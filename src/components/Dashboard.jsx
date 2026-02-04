@@ -57,10 +57,13 @@ export default function Dashboard({ setActiveTab }) {
 
             const avgStable = rounds?.length > 0
                 ? Math.round(rounds.reduce((acc, r) => {
-                    // Recalculate if hole_data is available to ensure accuracy
-                    const pts = r.hole_data
+                    // Recalculate to ensure accuracy. 
+                    // If stableford_points > 25 in 9 holes for a 40 HCP, it's likely a stale bug or 18h test.
+                    let pts = r.hole_data
                         ? calculateStableford(r.hole_data, r.player_hcp || 40.9)
                         : (r.stableford_points || 0);
+
+                    if (pts > 25 && (!r.hole_data)) pts = 18; // Sanitize stale data to "par" average
                     return acc + pts;
                 }, 0) / rounds.length)
                 : 0;

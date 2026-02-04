@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Dashboard from './components/Dashboard';
 import Games from './components/Games';
-import Training from './components/Training';
 import Tournaments from './components/Tournaments';
 import TrainingLog from './components/TrainingLog';
 import BottomNav from './components/BottomNav';
@@ -45,8 +44,9 @@ function App() {
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <footer style={{ marginTop: '2rem', padding: '2rem', textAlign: 'center', borderTop: '1px solid #e0e0e0', color: 'var(--text-muted)', fontSize: '0.8rem', paddingBottom: '100px' }}>
+      <footer style={{ marginTop: '2rem', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
         <p>© 2026 GolfTracker Premium. Juega con confianza.</p>
+        <div style={{ height: '100px' }}></div> {/* Spacer for floating nav */}
       </footer>
     </div>
   );
