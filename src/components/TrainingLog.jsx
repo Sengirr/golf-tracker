@@ -310,22 +310,32 @@ export default function TrainingLog() {
                         <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto' }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <span style={{ fontWeight: 500 }}>Approach Rodado</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Bolas en Radio 2m</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Bolas en Radio 2m (Total 30 bolas)</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
                                 <button
                                     onClick={() => handleInputChange('thursday', 'approachSuccess', Math.max(0, parseInt(progress.thursday.approachSuccess || 0) - 1))}
-                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                    disabled={parseInt(progress.thursday.approachSuccess || 0) <= 0}
+                                    style={{
+                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.approachSuccess || 0) <= 0) ? 'not-allowed' : 'pointer',
+                                        opacity: (parseInt(progress.thursday.approachSuccess || 0) <= 0) ? 0.5 : 1
+                                    }}
                                 >
                                     <Minus size={14} />
                                 </button>
-                                <div style={{ minWidth: '60px', textAlign: 'center' }}>
-                                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary-dark)' }}>{progress.thursday.approachSuccess}</span>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / {progress.thursday.approachTotal}</span>
+                                <div style={{ minWidth: '85px', textAlign: 'center' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary-dark)' }}>{progress.thursday.approachSuccess}</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / 30</span>
                                 </div>
                                 <button
-                                    onClick={() => handleInputChange('thursday', 'approachSuccess', Math.min(progress.thursday.approachTotal, parseInt(progress.thursday.approachSuccess || 0) + 1))}
-                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                    onClick={() => handleInputChange('thursday', 'approachSuccess', Math.min(30, parseInt(progress.thursday.approachSuccess || 0) + 1))}
+                                    disabled={parseInt(progress.thursday.approachSuccess || 0) >= 30}
+                                    style={{
+                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.approachSuccess || 0) >= 30) ? 'not-allowed' : 'pointer',
+                                        opacity: (parseInt(progress.thursday.approachSuccess || 0) >= 30) ? 0.5 : 1
+                                    }}
                                 >
                                     <Plus size={14} />
                                 </button>
@@ -338,27 +348,37 @@ export default function TrainingLog() {
                                 <span style={{ fontWeight: 500 }}>Putt Escalera</span>
                                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Aciertos Totales</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
                                 <button
                                     onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.max(0, parseInt(progress.thursday.stairsSuccess || 0) - 1))}
-                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                    disabled={parseInt(progress.thursday.stairsSuccess || 0) <= 0}
+                                    style={{
+                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.stairsSuccess || 0) <= 0) ? 'not-allowed' : 'pointer',
+                                        opacity: (parseInt(progress.thursday.stairsSuccess || 0) <= 0) ? 0.5 : 1
+                                    }}
                                 >
                                     <Minus size={14} />
                                 </button>
-                                <div style={{ minWidth: '70px', textAlign: 'center' }}>
+                                <div style={{ minWidth: '85px', textAlign: 'center' }}>
                                     <span style={{
                                         fontWeight: 800,
-                                        fontSize: '1.2rem',
+                                        fontSize: '1.05rem',
                                         color: parseInt(progress.thursday.stairsSuccess) > 20 ? '#D4AF37' : 'var(--primary-dark)',
                                         textShadow: parseInt(progress.thursday.stairsSuccess) > 20 ? '0 0 10px rgba(212, 175, 55, 0.3)' : 'none'
                                     }}>
                                         {progress.thursday.stairsSuccess}
                                     </span>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / {progress.thursday.stairsTotal}</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / 27</span>
                                 </div>
                                 <button
-                                    onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.min(progress.thursday.stairsTotal, parseInt(progress.thursday.stairsSuccess || 0) + 1))}
-                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                    onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.min(27, parseInt(progress.thursday.stairsSuccess || 0) + 1))}
+                                    disabled={parseInt(progress.thursday.stairsSuccess || 0) >= 27}
+                                    style={{
+                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.stairsSuccess || 0) >= 27) ? 'not-allowed' : 'pointer',
+                                        opacity: (parseInt(progress.thursday.stairsSuccess || 0) >= 27) ? 0.5 : 1
+                                    }}
                                 >
                                     <Plus size={14} />
                                 </button>
