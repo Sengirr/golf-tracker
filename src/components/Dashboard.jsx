@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Trophy, Target, Calendar, Clock, Plus, BarChart3 } from 'lucide-react';
+import { Trophy, Target, Calendar, Clock, Plus, BarChart3, MapPin } from 'lucide-react';
 
 export default function Dashboard({ setActiveTab }) {
     const [stats, setStats] = useState({
         avgScore: 0,
         totalRounds: 0,
         trainingHours: 0,
-        upcomingTournaments: 0
+        upcomingTournaments: 0,
+        nextTournament: null
     });
     const [loading, setLoading] = useState(true);
 
@@ -20,9 +21,11 @@ export default function Dashboard({ setActiveTab }) {
         try {
             const { data: rounds } = await supabase.from('rounds').select('score');
             const { data: training } = await supabase.from('trainings').select('duration_mins');
-            const { count: tournCount } = await supabase.from('tournaments')
-                .select('*', { count: 'exact', head: true })
-                .gte('date', new Date().toISOString().split('T')[0]);
+            const { data: tourns, count: tournCount } = await supabase.from('tournaments')
+                .select('*', { count: 'exact' })
+                .gte('date', new Date().toISOString().split('T')[0])
+                .order('date', { ascending: true })
+                .limit(1);
 
             const avg = rounds?.length > 0
                 ? Math.round(rounds.reduce((acc, r) => acc + r.score, 0) / rounds.length)
@@ -36,7 +39,8 @@ export default function Dashboard({ setActiveTab }) {
                 avgScore: avg,
                 totalRounds: rounds?.length || 0,
                 trainingHours: hours,
-                upcomingTournaments: tournCount || 0
+                upcomingTournaments: tournCount || 0,
+                nextTournament: tourns?.[0] || null
             });
         } catch (error) {
             console.error('Error fetching stats:', error);
@@ -92,13 +96,38 @@ export default function Dashboard({ setActiveTab }) {
                 </div>
 
                 <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', color: 'white' }}>
-                    <h3 style={{ color: 'white' }}>Consejo Pro</h3>
-                    <p style={{ opacity: 0.9, marginBottom: '1.5rem' }}>
-                        "Céntrate en el juego corto. El 60% de tus golpes se realizan a menos de 100 yardas del green."
-                    </p>
-                    <div style={{ background: 'rgba(255,255,255,0.1)', padding: '1rem', borderRadius: '12px' }}>
-                        <p style={{ fontSize: '0.875rem', fontWeight: 500 }}>Próximo Torneo</p>
-                        <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{stats.upcomingTournaments > 0 ? 'Ver calendario' : 'No hay torneos programados'}</p>
+                    <h3 style={{ color: 'white' }}>Próximo Torneo</h3>
+                    {stats.nextTournament ? (
+                        <div style={{ background: 'rgba(255,255,255,0.1)', padding: '1.25rem', borderRadius: '12px', marginTop: '1rem' }}>
+                            <p style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{stats.nextTournament.name}</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', opacity: 0.9 }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={16} /> {stats.nextTournament.course}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={16} /> {stats.nextTournament.date}</span>
+                            </div>
+                            <button
+                                className="btn-primary"
+                                onClick={() => setActiveTab('tournaments')}
+                                style={{ marginTop: '1.5rem', background: 'white', color: 'var(--primary)', width: '100%' }}
+                            >
+                                Ver todos
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <p style={{ opacity: 0.9, marginBottom: '1.5rem' }}>
+                                No tienes torneos programados próximamente. ¡Es hora de apuntarse a uno!
+                            </p>
+                            <button
+                                className="btn-primary"
+                                onClick={() => setActiveTab('tournaments')}
+                                style={{ background: 'white', color: 'var(--primary)', width: '100%' }}
+                            >
+                                Buscar Torneos
+                            </button>
+                        </>
+                    )}
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+                        <p style={{ fontSize: '0.875rem', opacity: 0.8 }}><strong>Consejo:</strong> El 60% de los golpes se realizan a menos de 100 yardas.</p>
                     </div>
                 </div>
             </div>
