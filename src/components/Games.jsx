@@ -13,7 +13,7 @@ export default function Games() {
     const [rounds, setRounds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [entryMode, setEntryMode] = useState('quick'); // 'quick' or 'detailed'
+    const [entryMode, setEntryMode] = useState('detailed'); // 'detailed' set as default
     const [formData, setFormData] = useState({
         course_name: 'Benalmádena Golf',
         score: '',
