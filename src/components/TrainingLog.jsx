@@ -16,7 +16,8 @@ export default function TrainingLog() {
     const [currentWeekId, setCurrentWeekId] = useState(getWeekId(new Date()));
     const [progress, setProgress] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState('week'); // 'week' or 'evolution'
+    const [history, setHistory] = useState([]);
     const saveTimeout = useRef(null);
 
     function getDefaultProgress() {
@@ -55,6 +56,25 @@ export default function TrainingLog() {
         }
         loadData();
     }, [currentWeekId]);
+
+    // Load historical data for evolution view
+    useEffect(() => {
+        if (activeTab === 'evolution') {
+            async function fetchHistory() {
+                try {
+                    const { data, error } = await supabase
+                        .from('agenda_logs')
+                        .select('week_id, progress')
+                        .order('week_id', { ascending: true })
+                        .limit(8); // Show last 8 weeks
+                    if (data) setHistory(data);
+                } catch (err) {
+                    console.error("Error fetching history:", err);
+                }
+            }
+            fetchHistory();
+        }
+    }, [activeTab]);
 
     // Save to Supabase with debounce
     useEffect(() => {
@@ -162,33 +182,129 @@ export default function TrainingLog() {
         borderBottom: '1px solid #f5f5f5'
     };
 
+    const EvolutionView = () => {
+        if (history.length === 0) return (
+            <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                <Calendar size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>Aún no hay suficientes datos para mostrar tu evolución.</p>
+                <p style={{ fontSize: '0.8rem' }}>Sigue registrando tus entrenamientos semanales.</p>
+            </div>
+        );
+
+        const getMondayAvg = (progress) => {
+            const scores = [progress.monday?.calibShort, progress.monday?.calibMid, progress.monday?.calibLong];
+            const valid = scores.filter(s => s !== '' && !isNaN(parseInt(s)));
+            return valid.length ? valid.reduce((a, b) => a + parseInt(b), 0) / valid.length : 0;
+        };
+
+        const getThursdayScore = (progress) => {
+            return (parseInt(progress.thursday?.approachSuccess || 0) / (progress.thursday?.approachTotal || 30)) * 10
+                + (parseInt(progress.thursday?.stairsSuccess || 0) / (progress.thursday?.stairsTotal || 27)) * 10;
+        };
+
+        return (
+            <div className="fade-in">
+                <div style={dayStyle}>
+                    <h3 style={{ margin: '0 0 1.5rem 0', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <Target size={20} /> Evolución: Test de Precisión (Lunes)
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '150px', padding: '0 1rem' }}>
+                        {history.map((h, i) => {
+                            const avg = getMondayAvg(h.progress);
+                            const height = (avg / 10) * 100;
+                            return (
+                                <div key={h.week_id} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ height: `${height}%`, width: '100%', background: getScoreColor(avg), borderRadius: '4px 4px 0 0', position: 'relative', transition: 'height 0.3s ease' }}>
+                                        <span style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7rem', fontWeight: 800 }}>{avg.toFixed(1)}</span>
+                                    </div>
+                                    <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600 }}>W{h.week_id.split('-W')[1]}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div style={{ ...dayStyle, borderLeftColor: '#6a994e' }}>
+                    <h3 style={{ margin: '0 0 1.5rem 0', color: '#6a994e', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <Sparkles size={20} /> Evolución: Juego Corto (Jueves)
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '150px', padding: '0 1rem' }}>
+                        {history.map((h, i) => {
+                            const score = getThursdayScore(h.progress);
+                            const height = (score / 20) * 100;
+                            return (
+                                <div key={h.week_id} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ height: `${height}%`, width: '100%', background: '#6a994e', borderRadius: '4px 4px 0 0', position: 'relative', transition: 'height 0.3s ease' }}>
+                                        <span style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7rem', fontWeight: 800 }}>{score.toFixed(0)}</span>
+                                    </div>
+                                    <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600 }}>W{h.week_id.split('-W')[1]}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p style={{ marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', fontStyle: 'italic' }}>
+                        Puntuación combinada de Approach (máx 10) y Putt Escalera (máx 10).
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="fade-in" style={{ paddingBottom: '120px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div>
-                        <h1>Agenda Semanal</h1>
+                        <h1>Entrenamiento Semanal</h1>
                         <p style={{ color: 'var(--text-muted)', margin: 0 }}>Tu hoja de ruta para bajar el hándicap.</p>
                     </div>
                     {saving && <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--primary)', fontSize: '0.8rem', background: 'rgba(56, 102, 65, 0.1)', padding: '0.4rem 0.8rem', borderRadius: '20px', animation: 'pulse 1.5s infinite' }}>
                         <Loader2 size={14} className="spin" /> Guardando...
                     </div>}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'white', padding: '0.6rem 1.25rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                    <button onClick={() => changeWeek(-1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronLeft size={18} /></button>
-                    <div style={{ textAlign: 'center', minWidth: '120px' }}>
-                        <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Semana {currentWeekId.split('-W')[1]}</span>
-                        <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--primary-dark)' }}>{getWeekRange(currentWeekId)}</span>
-                    </div>
-                    <button onClick={() => changeWeek(1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronRight size={18} /></button>
+
+                <div style={{ display: 'flex', gap: '0.5rem', background: '#f5f5f5', padding: '0.3rem', borderRadius: '12px' }}>
+                    <button
+                        onClick={() => setActiveTab('week')}
+                        style={{
+                            padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontSize: '0.85rem', fontWeight: 700,
+                            background: activeTab === 'week' ? 'white' : 'transparent',
+                            color: activeTab === 'week' ? 'var(--primary)' : 'var(--text-muted)',
+                            boxShadow: activeTab === 'week' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                            cursor: 'pointer'
+                        }}
+                    >Semana</button>
+                    <button
+                        onClick={() => setActiveTab('evolution')}
+                        style={{
+                            padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontSize: '0.85rem', fontWeight: 700,
+                            background: activeTab === 'evolution' ? 'white' : 'transparent',
+                            color: activeTab === 'evolution' ? 'var(--primary)' : 'var(--text-muted)',
+                            boxShadow: activeTab === 'evolution' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                            cursor: 'pointer'
+                        }}
+                    >Evolución</button>
                 </div>
+
+                {activeTab === 'week' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'white', padding: '0.6rem 1.25rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                        <button onClick={() => changeWeek(-1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronLeft size={18} /></button>
+                        <div style={{ textAlign: 'center', minWidth: '120px' }}>
+                            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Semana {currentWeekId.split('-W')[1]}</span>
+                            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--primary-dark)' }}>{getWeekRange(currentWeekId)}</span>
+                        </div>
+                        <button onClick={() => changeWeek(1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronRight size={18} /></button>
+                    </div>
+                )}
             </div>
 
             {loading ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem', gap: '1rem', color: 'var(--text-muted)' }}>
                     <Loader2 size={40} className="spin" color="var(--primary)" />
-                    <p>Cargando tu agenda...</p>
+                    <p>Cargando tus entrenamientos...</p>
                 </div>
+            ) : activeTab === 'evolution' ? (
+                <EvolutionView />
             ) : progress ? (
                 <>
                     {/* MONDAY */}

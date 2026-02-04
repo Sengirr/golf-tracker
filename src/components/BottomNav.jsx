@@ -5,7 +5,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
     const tabs = [
         { id: 'dashboard', label: 'Panel', icon: LayoutDashboard },
         { id: 'games', label: 'Partidas', icon: Trophy },
-        { id: 'agenda', label: 'Agenda', icon: BookOpen },
+        { id: 'agenda', label: 'Entreno', icon: BookOpen },
         { id: 'tournaments', label: 'Torneos', icon: CalendarIcon }
     ];
 
