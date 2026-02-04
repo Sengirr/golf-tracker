@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle2, ChevronRight, Award, Trophy, ChevronLeft, Calendar, Sparkles, Loader2 } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Award, Trophy, ChevronLeft, Calendar, Sparkles, Loader2, Target } from 'lucide-react';
 
 export default function TrainingLog() {
     // Helper to get ISO week ID (e.g., 2024-W06)
