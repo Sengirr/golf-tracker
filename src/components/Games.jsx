@@ -308,15 +308,14 @@ export default function Games() {
                                     <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {formatDate(round.date)}</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Hash size={14} /> {round.holes_played} hoyos</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
-                      <strong>Triputts:</strong> {round.triputts || 0}
-                    </span>
-                    {round.stableford_points > 0 && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#386641' }}>
-                        <strong>Stableford:</strong> {round.stableford_points} pts
-                      </span>
-                    )}
-                  </div>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
+                                            <strong>Triputts:</strong> {round.triputts || 0}
+                                        </span>
+                                        {round.stableford_points > 0 && (
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#386641' }}>
+                                                <strong>Stableford:</strong> {round.stableford_points} pts
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -327,9 +326,9 @@ export default function Games() {
                                 <Trash2 size={20} />
                             </button>
                         </div>
-            ))
+                    ))
                 )}
+            </div>
         </div>
-        </div >
     );
 }
