@@ -230,6 +230,47 @@ nav {
     align-items: stretch !important;
   }
 
+  /* Table Styles for Detailed Entry */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #eee;
+  }
+
+  th {
+    background: #f8f9fa;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 2px solid #eee;
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  .btn-link {
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 1px solid transparent;
+  }
+
+  .btn-link.active {
+    box-shadow: 0 4px 12px rgba(27, 67, 50, 0.2);
+  }
+
   .mobile-only-header {
     display: flex !important;
   }
