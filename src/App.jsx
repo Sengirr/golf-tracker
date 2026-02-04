@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Dashboard from './components/Dashboard';
 import Games from './components/Games';
+import Training from './components/Training';
+import Tournaments from './components/Tournaments';
 import { supabase } from './lib/supabase';
 import { LayoutDashboard, Trophy, Dumbbell, Calendar as CalendarIcon, Flag } from 'lucide-react';
 
@@ -18,21 +20,8 @@ function App() {
     switch (activeTab) {
       case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
       case 'games': return <Games />;
-      // Placeholders for now
-      case 'training': return (
-        <div className="card" style={{ padding: '4rem', textAlign: 'center' }}>
-          <Dumbbell size={48} color="var(--primary)" style={{ marginBottom: '1rem' }} />
-          <h2>Training Logs</h2>
-          <p>This module is coming soon! You'll be able to track your range sessions and putting drills.</p>
-        </div>
-      );
-      case 'tournaments': return (
-        <div className="card" style={{ padding: '4rem', textAlign: 'center' }}>
-          <CalendarIcon size={48} color="var(--primary)" style={{ marginBottom: '1rem' }} />
-          <h2>Tournament Schedule</h2>
-          <p>Stay tuned for the tournament calendar and registration tracking.</p>
-        </div>
-      );
+      case 'training': return <Training />;
+      case 'tournaments': return <Tournaments />;
       default: return <Dashboard setActiveTab={setActiveTab} />;
     }
   };
