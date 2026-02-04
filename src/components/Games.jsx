@@ -110,12 +110,34 @@ export default function Games() {
     }
 
     const RoundDetailModal = ({ round, onClose }) => {
-        if (!round || !round.hole_data) return null;
-        const playingHCP = getPHCP(round.player_hcp || 0);
+        if (!round) return null;
+        const playingHCP = getPHCP(round.player_hcp || 40.9);
 
         return (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                <div className="card fade-in" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0,0,0,0.8)',
+                zIndex: 4000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '1rem',
+                backdropFilter: 'blur(4px)'
+            }}>
+                <div className="card fade-in" style={{
+                    width: '100%',
+                    maxWidth: '500px',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    padding: '1.5rem',
+                    background: 'white',
+                    position: 'relative',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <h2 style={{ margin: 0 }}>Detalle Hoyo a Hoyo</h2>
                         <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
