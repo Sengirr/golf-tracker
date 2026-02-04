@@ -27,13 +27,22 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      <nav>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ background: 'var(--primary)', color: 'white', padding: '0.5rem', borderRadius: '8px' }}>
-            <Flag size={20} fill="currentColor" />
+    <div className="fade-in">
+      <header className="mobile-only-header" style={{ padding: '1rem 1.5rem', background: 'white', display: 'none', justifyContent: 'center', borderBottom: '1px solid #eee' }}>
+        <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, color: 'var(--primary)', fontSize: '1.25rem' }}>
+          <div style={{ background: 'var(--primary)', color: 'white', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+            <Flag size={20} fill="white" />
           </div>
-          <span style={{ fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.5px' }}>GOLF<span style={{ color: 'var(--primary)' }}>TRACKER</span></span>
+          GOLFTRACKER
+        </div>
+      </header>
+
+      <nav>
+        <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, color: 'var(--primary)', fontSize: '1.25rem' }}>
+          <div style={{ background: 'var(--primary)', color: 'white', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+            <Flag size={20} fill="white" />
+          </div>
+          GOLFTRACKER
         </div>
         <div className="nav-links">
           {tabs.map(tab => (
@@ -42,10 +51,9 @@ function App() {
               href="#"
               className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
               onClick={(e) => { e.preventDefault(); setActiveTab(tab.id); }}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
-              <tab.icon size={18} />
-              {tab.label}
+              <tab.icon size={20} />
+              <span>{tab.label}</span>
             </a>
           ))}
         </div>
