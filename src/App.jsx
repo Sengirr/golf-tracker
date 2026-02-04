@@ -5,7 +5,7 @@ import Tournaments from './components/Tournaments';
 import TrainingLog from './components/TrainingLog';
 import BottomNav from './components/BottomNav';
 import { supabase } from './lib/supabase';
-import { LayoutDashboard, Trophy, Dumbbell, Calendar as CalendarIcon, Flag, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Trophy, Calendar as CalendarIcon, Flag, BookOpen } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -44,9 +44,8 @@ function App() {
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <footer style={{ marginTop: '2rem', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+      <footer style={{ marginTop: '4rem', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
         <p>© 2026 GolfTracker Premium. Juega con confianza.</p>
-        <div style={{ height: '100px' }}></div> {/* Spacer for floating nav */}
       </footer>
     </div>
   );

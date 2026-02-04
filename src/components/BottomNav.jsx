@@ -12,7 +12,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
     return (
         <div className="bottom-nav-container" style={{
             position: 'fixed',
-            bottom: '1.5rem',
+            bottom: '4.5rem',
             left: '1rem',
             right: '1rem',
             background: 'rgba(255, 255, 255, 0.95)',
