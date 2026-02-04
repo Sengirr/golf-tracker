@@ -223,13 +223,15 @@ nav {
   .nav-links {
     width: 100%;
     overflow-x: auto;
-    padding: 0.25rem 1rem;
+    padding: 0.5rem 1.5rem;
+    /* Better padding for scroll */
     justify-content: flex-start;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 1.25rem;
-    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    gap: 1.5rem;
+    margin-left: -0.5rem;
+    /* Counteract nav padding */
+    width: calc(100% + 1rem);
   }
 
   .nav-links::-webkit-scrollbar {
