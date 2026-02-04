@@ -21,8 +21,8 @@ export default function TrainingLog() {
     function getDefaultProgress() {
         return {
             monday: { calib54: false, puttCircuit: false, puttScore: '' },
-            tuesday: { proClass: false, towelDrill: '' },
-            wednesday: { rule60m: '' },
+            tuesday: { proClass: false, towelMisses: '', towelTotal: '10' },
+            wednesday: { fieldDay: false },
             thursday: { freePlay: false, approachRodado: false, puttEscalera: false }
         };
     }
@@ -70,8 +70,8 @@ export default function TrainingLog() {
     const isDayComplete = (day) => {
         switch (day) {
             case 'monday': return progress.monday.calib54 && progress.monday.puttCircuit;
-            case 'tuesday': return progress.tuesday.proClass && progress.tuesday.towelDrill !== '';
-            case 'wednesday': return progress.wednesday.rule60m !== '';
+            case 'tuesday': return progress.tuesday.proClass && progress.tuesday.towelMisses !== '';
+            case 'wednesday': return progress.wednesday.fieldDay;
             case 'thursday': return progress.thursday.freePlay && progress.thursday.approachRodado && progress.thursday.puttEscalera;
             default: return false;
         }
@@ -168,12 +168,20 @@ export default function TrainingLog() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <input
                             type="number"
-                            placeholder="%"
-                            value={progress.tuesday.towelDrill}
-                            onChange={(e) => handleInputChange('tuesday', 'towelDrill', e.target.value)}
-                            style={{ width: '55px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                            placeholder="Fallos"
+                            value={progress.tuesday.towelMisses}
+                            onChange={(e) => handleInputChange('tuesday', 'towelMisses', e.target.value)}
+                            style={{ width: '45px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
                         />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>%</span>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/</span>
+                        <input
+                            type="number"
+                            placeholder="Total"
+                            value={progress.tuesday.towelTotal}
+                            onChange={(e) => handleInputChange('tuesday', 'towelTotal', e.target.value)}
+                            style={{ width: '45px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                        />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>fallos</span>
                     </div>
                 </div>
             </div>
@@ -181,23 +189,14 @@ export default function TrainingLog() {
             {/* WEDNESDAY */}
             <div style={{ ...dayStyle, borderLeftColor: '#a7c957' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <h3 style={{ margin: 0, color: '#a7c957', fontSize: '1.1rem' }}>Miércoles - Campo & Regla</h3>
+                    <h3 style={{ margin: 0, color: '#a7c957', fontSize: '1.1rem' }}>Miércoles - Campo</h3>
                     {isDayComplete('wednesday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
                 </div>
                 <div style={agendaLine}>
-                    <div></div>
-                    <span style={{ fontWeight: 500 }}>9 Hoyos - Regla 60m</span>
-                    <input
-                        type="number"
-                        placeholder="Veces"
-                        value={progress.wednesday.rule60m}
-                        onChange={(e) => handleInputChange('wednesday', 'rule60m', e.target.value)}
-                        style={{ width: '75px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
-                    />
+                    <input type="checkbox" checked={progress.wednesday.fieldDay} onChange={() => handleToggle('wednesday', 'fieldDay')} style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: 500 }}>Solo campo</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
                 </div>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Sparkles size={12} /> Veces respetada la regla de no atacar a menos de 60m.
-                </p>
             </div>
 
             {/* THURSDAY */}
