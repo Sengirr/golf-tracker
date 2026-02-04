@@ -231,17 +231,6 @@ export default function Dashboard({ setActiveTab }) {
                     </p>
                 </div>
 
-                <div className="card">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                        <BarChart3 size={20} color="var(--primary)" />
-                        <h3 style={{ margin: 0 }}>Actividad Reciente</h3>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
-                            Tus partidas y entrenamientos aparecerán aquí.
-                        </p>
-                    </div>
-                </div>
 
                 <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', color: 'white' }}>
                     <h3 style={{ color: 'white' }}>Próximo Torneo</h3>
