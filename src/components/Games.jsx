@@ -2,17 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Plus, Trash2, Calendar, MapPin, Hash } from 'lucide-react';
 
+const BENALMADENA_SCORECARD = {
+    name: 'Benalmádena Golf',
+    holes: 9,
+    pars: [3, 3, 3, 3, 3, 3, 3, 3, 3],
+    si: [13, 17, 11, 15, 3, 5, 9, 1, 7]
+};
+
 export default function Games() {
     const [rounds, setRounds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
+    const [entryMode, setEntryMode] = useState('quick'); // 'quick' or 'detailed'
     const [formData, setFormData] = useState({
-        course_name: '',
+        course_name: 'Benalmádena Golf',
         score: '',
-        holes_played: 18,
+        holes_played: 9,
         triputts: 0,
+        player_hcp: 0,
         date: new Date().toISOString().split('T')[0],
-        notes: ''
+        notes: '',
+        hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false })
     });
 
     const formatDate = (dateString) => {
@@ -39,11 +49,61 @@ export default function Games() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        const { error } = await supabase.from('rounds').insert([formData]);
+
+        let finalData = { ...formData };
+
+        if (entryMode === 'detailed') {
+            const totalStrokes = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.strokes) || 0), 0);
+            const totalTriputts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) >= 3 ? 1 : 0), 0);
+
+            // Stableford Calculation
+            const hcp = parseFloat(formData.player_hcp) || 0;
+            const points = formData.hole_data.reduce((acc, hole, idx) => {
+                const par = BENALMADENA_SCORECARD.pars[idx];
+                const si = BENALMADENA_SCORECARD.si[idx];
+
+                // Distribution of strokes (Simplified for 18 SI)
+                let strokesAllowed = Math.floor(hcp / 18);
+                if (hcp % 18 >= si) strokesAllowed += 1;
+
+                const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
+                const holePoints = Math.max(0, 2 + par - netScore);
+                return acc + holePoints;
+            }, 0);
+
+            finalData = {
+                ...finalData,
+                score: totalStrokes,
+                triputts: totalTriputts,
+                stableford_points: points
+            };
+        }
+
+        const { error } = await supabase.from('rounds').insert([{
+            course_name: finalData.course_name,
+            score: parseInt(finalData.score),
+            holes_played: parseInt(finalData.holes_played),
+            triputts: parseInt(finalData.triputts),
+            player_hcp: parseFloat(finalData.player_hcp),
+            stableford_points: finalData.stableford_points || 0,
+            hole_data: finalData.hole_data,
+            date: finalData.date,
+            notes: finalData.notes
+        }]);
+
         if (error) alert('Error al guardar la partida');
         else {
             setShowForm(false);
-            setFormData({ course_name: '', score: '', holes_played: 18, triputts: 0, date: new Date().toISOString().split('T')[0], notes: '' });
+            setFormData({
+                course_name: 'Benalmádena Golf',
+                score: '',
+                holes_played: 9,
+                triputts: 0,
+                player_hcp: 0,
+                date: new Date().toISOString().split('T')[0],
+                notes: '',
+                hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false })
+            });
             fetchRounds();
         }
     }
@@ -70,67 +130,160 @@ export default function Games() {
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '2rem' }}>
-                    <h3>Nueva Partida</h3>
-                    <form onSubmit={handleSubmit} className="grid grid-cols-2">
-                        <div className="input-group">
-                            <label>Nombre del Campo</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.course_name}
-                                onChange={e => setFormData({ ...formData, course_name: e.target.value })}
-                                placeholder="ej. Pebble Beach"
-                            />
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
+                        <button
+                            className={`btn-link ${entryMode === 'quick' ? 'active' : ''}`}
+                            onClick={() => setEntryMode('quick')}
+                            style={{ padding: '0.5rem 1rem', background: entryMode === 'quick' ? 'var(--primary)' : 'transparent', color: entryMode === 'quick' ? 'white' : 'var(--text)' }}
+                        >
+                            Rápido
+                        </button>
+                        <button
+                            className={`btn-link ${entryMode === 'detailed' ? 'active' : ''}`}
+                            onClick={() => setEntryMode('detailed')}
+                            style={{ padding: '0.5rem 1rem', background: entryMode === 'detailed' ? 'var(--primary)' : 'transparent', color: entryMode === 'detailed' ? 'white' : 'var(--text)' }}
+                        >
+                            Hoyo a Hoyo
+                        </button>
+                    </div>
+
+                    <h3>Registrar Nueva Partida</h3>
+                    <form onSubmit={handleSubmit}>
+                        <div className="grid grid-cols-2">
+                            <div className="input-group">
+                                <label>Campo de Golf</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.course_name}
+                                    onChange={e => setFormData({ ...formData, course_name: e.target.value })}
+                                    placeholder="ej. Benalmádena Golf"
+                                />
+                            </div>
+                            <div className="input-group">
+                                <label>Tu HCP (Hándicap)</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    required
+                                    value={formData.player_hcp}
+                                    onChange={e => setFormData({ ...formData, player_hcp: e.target.value })}
+                                    placeholder="ej. 24.5"
+                                />
+                            </div>
+
+                            {entryMode === 'quick' ? (
+                                <>
+                                    <div className="input-group">
+                                        <label>Puntuación Total (Golpes)</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            value={formData.score}
+                                            onChange={e => setFormData({ ...formData, score: e.target.value })}
+                                            placeholder="80"
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label>Hoyos Jugados</label>
+                                        <select
+                                            value={formData.holes_played}
+                                            onChange={e => setFormData({ ...formData, holes_played: e.target.value })}
+                                        >
+                                            <option value={9}>9 Hoyos</option>
+                                            <option value={18}>18 Hoyos</option>
+                                        </select>
+                                    </div>
+                                    <div className="input-group">
+                                        <label>Triputts (3-putts)</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            value={formData.triputts}
+                                            onChange={e => setFormData({ ...formData, triputts: e.target.value })}
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <h4 style={{ marginBottom: '1rem' }}>Registro por Hoyo (S.I. y Par de Benalmádena)</h4>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
+                                            <thead>
+                                                <tr style={{ background: '#f5f5f5' }}>
+                                                    <th style={{ padding: '0.5rem' }}>H</th>
+                                                    <th style={{ padding: '0.5rem' }}>Golpes</th>
+                                                    <th style={{ padding: '0.5rem' }}>Putts</th>
+                                                    <th style={{ padding: '0.5rem' }}>GIR</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {formData.hole_data.map((hole, idx) => (
+                                                    <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                                                        <td style={{ textAlign: 'center', fontWeight: 700 }}>{idx + 1}</td>
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                value={hole.strokes}
+                                                                onChange={e => {
+                                                                    const newData = [...formData.hole_data];
+                                                                    newData[idx] = { ...hole, strokes: e.target.value };
+                                                                    setFormData({ ...formData, hole_data: newData });
+                                                                }}
+                                                                style={{ width: '60px', padding: '0.25rem' }}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                value={hole.putts}
+                                                                onChange={e => {
+                                                                    const newData = [...formData.hole_data];
+                                                                    newData[idx] = { ...hole, putts: e.target.value };
+                                                                    setFormData({ ...formData, hole_data: newData });
+                                                                }}
+                                                                style={{ width: '60px', padding: '0.25rem' }}
+                                                            />
+                                                        </td>
+                                                        <td style={{ textAlign: 'center' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={hole.gir}
+                                                                onChange={e => {
+                                                                    const newData = [...formData.hole_data];
+                                                                    newData[idx] = { ...hole, gir: e.target.checked };
+                                                                    setFormData({ ...formData, hole_data: newData });
+                                                                }}
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="input-group">
+                                <label>Fecha</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={formData.date}
+                                    onChange={e => setFormData({ ...formData, date: e.target.value })}
+                                />
+                            </div>
+                            <div className="input-group" style={{ gridColumn: 'span 2' }}>
+                                <label>Notas / Sensaciones</label>
+                                <textarea
+                                    value={formData.notes}
+                                    onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                                    placeholder="ej. Muy bien con el driver, pero fallando putts cortos"
+                                />
+                            </div>
                         </div>
-                        <div className="input-group">
-                            <label>Puntuación (Golpes)</label>
-                            <input
-                                type="number"
-                                required
-                                value={formData.score}
-                                onChange={e => setFormData({ ...formData, score: e.target.value })}
-                                placeholder="72"
-                            />
-                        </div>
-                        <div className="input-group">
-                            <label>Hoyos Jugados</label>
-                            <select
-                                value={formData.holes_played}
-                                onChange={e => setFormData({ ...formData, holes_played: e.target.value })}
-                            >
-                                <option value={18}>18 Hoyos</option>
-                                <option value={9}>9 Hoyos</option>
-                            </select>
-                        </div>
-                        <div className="input-group">
-                            <label>Triputts (3-putts)</label>
-                            <input
-                                type="number"
-                                required
-                                value={formData.triputts}
-                                onChange={e => setFormData({ ...formData, triputts: e.target.value })}
-                                placeholder="0"
-                            />
-                        </div>
-                        <div className="input-group">
-                            <label>Fecha</label>
-                            <input
-                                type="date"
-                                required
-                                value={formData.date}
-                                onChange={e => setFormData({ ...formData, date: e.target.value })}
-                            />
-                        </div>
-                        <div className="input-group" style={{ gridColumn: 'span 2' }}>
-                            <label>Notas</label>
-                            <textarea
-                                rows="3"
-                                value={formData.notes}
-                                onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                                placeholder="¿Cómo fue el juego?"
-                            ></textarea>
-                        </div>
-                        <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Guardar Partida</button>
+                        <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>Guardar Partida</button>
                     </form>
                 </div>
             )}
@@ -155,9 +308,15 @@ export default function Games() {
                                     <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {formatDate(round.date)}</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Hash size={14} /> {round.holes_played} hoyos</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
-                                            <strong>Triputts:</strong> {round.triputts || 0}
-                                        </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
+                      <strong>Triputts:</strong> {round.triputts || 0}
+                    </span>
+                    {round.stableford_points > 0 && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#386641' }}>
+                        <strong>Stableford:</strong> {round.stableford_points} pts
+                      </span>
+                    )}
+                  </div>
                                     </div>
                                 </div>
                             </div>
@@ -168,9 +327,9 @@ export default function Games() {
                                 <Trash2 size={20} />
                             </button>
                         </div>
-                    ))
+            ))
                 )}
-            </div>
         </div>
+        </div >
     );
 }
