@@ -47,8 +47,11 @@ export default function Dashboard({ setActiveTab }) {
                 .order('date', { ascending: true })
                 .limit(1);
 
-            const avg = rounds?.length > 0
-                ? Math.round(rounds.reduce((acc, r) => acc + r.score, 0) / rounds.length)
+            const avgNet = rounds?.length > 0
+                ? (rounds.reduce((acc, r) => {
+                    const phcp = getPHCP(r.player_hcp || 40.9);
+                    return acc + (r.score - phcp);
+                }, 0) / rounds.length).toFixed(1)
                 : 'N/A';
 
             const avgTri = rounds?.length > 0
@@ -92,7 +95,7 @@ export default function Dashboard({ setActiveTab }) {
                 : "Mantén la constancia en el campo para empezar a bajar tu handicap.";
 
             setStats({
-                avgScore: avg,
+                avgScore: avgNet,
                 totalRounds: rounds?.length || 0,
                 trainingHours: hours,
                 avgTriputts: avgTri,
@@ -141,10 +144,10 @@ export default function Dashboard({ setActiveTab }) {
     };
 
     const statCards = [
-        { label: 'Puntuación Media', value: stats.avgScore || 'N/A', icon: Target, color: '#386641' },
+        { label: 'Media Netos', value: stats.avgScore || 'N/A', icon: Target, color: '#386641' },
         { label: 'Media Stableford', value: `${stats.avgStableford} pts`, icon: BarChart3, color: '#1b4332' },
-        { label: 'Triputts Medios', value: stats.avgTriputts, icon: MousePointer2, color: '#bc4749' },
-        { label: 'Total Partidas', value: stats.totalRounds, icon: Trophy, color: '#6a994e' }
+        { label: 'Total Partidas', value: stats.totalRounds, icon: Trophy, color: '#6a994e' },
+        { label: 'Triputts Medios', value: stats.avgTriputts, icon: MousePointer2, color: '#bc4749' }
     ];
 
     return (

@@ -121,7 +121,7 @@ export default function Games() {
                 right: 0,
                 bottom: 0,
                 background: 'rgba(0,0,0,0.8)',
-                zIndex: 4000,
+                zIndex: 9999,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -157,11 +157,11 @@ export default function Games() {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee' }}>
-                                <th style={{ padding: '0.5rem', fontSize: '0.8rem' }}>H</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.8rem' }}>PAR (SI)</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.8rem' }}>BRUTO</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.8rem' }}>NETO</th>
-                                <th style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'right' }}>PTS</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>H</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>PAR(SI)</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>BRU</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>NET</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem', textAlign: 'right' }}>PTS</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -366,7 +366,7 @@ export default function Games() {
                                     <div style={{ width: '100%', padding: '0.4rem 0.25rem', background: 'rgba(255,255,255,0.1)' }}>
                                         <span style={{ fontSize: '0.6rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>NETOS</span>
                                         <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>
-                                            {round.score - getPHCP(round.player_hcp || 0)}
+                                            {round.score - getPHCP(round.player_hcp || 40.9)}
                                         </span>
                                     </div>
                                 </div>
