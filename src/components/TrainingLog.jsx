@@ -21,7 +21,7 @@ export default function TrainingLog() {
 
     function getDefaultProgress() {
         return {
-            monday: { calib54: false, puttCircuit: false, puttScore: '' },
+            monday: { calibShort: '', calibMid: '', calibLong: '', puttCircuit: false, puttScore: '' },
             tuesday: { proClass: false, towelMisses: '', towelTotal: '10' },
             wednesday: { fieldDay: false },
             thursday: { freePlay: false, approachRodado: false, puttEscalera: false }
@@ -113,7 +113,7 @@ export default function TrainingLog() {
 
     const isDayComplete = (day) => {
         switch (day) {
-            case 'monday': return progress.monday.calib54 && progress.monday.puttCircuit;
+            case 'monday': return progress.monday.calibShort !== '' && progress.monday.calibMid !== '' && progress.monday.calibLong !== '' && progress.monday.puttCircuit;
             case 'tuesday': return progress.tuesday.proClass && progress.tuesday.towelMisses !== '';
             case 'wednesday': return progress.wednesday.fieldDay;
             case 'thursday': return progress.thursday.freePlay && progress.thursday.approachRodado && progress.thursday.puttEscalera;
@@ -133,6 +133,14 @@ export default function TrainingLog() {
             ...prev,
             [day]: { ...prev[day], [field]: value }
         }));
+    };
+
+    const getScoreColor = (score) => {
+        const val = parseInt(score);
+        if (isNaN(val)) return 'var(--text-muted)';
+        if (val <= 4) return '#bc4749'; // Rojo (0-4)
+        if (val <= 7) return '#f4a261'; // Amarillo (5-7)
+        return '#386641'; // Verde (8-10)
     };
 
     const dayStyle = {
@@ -189,10 +197,42 @@ export default function TrainingLog() {
                             <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.1rem' }}>Lunes - Calibración & Putt</h3>
                             {isDayComplete('monday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
                         </div>
-                        <div style={agendaLine}>
-                            <input type="checkbox" checked={progress.monday.calib54} onChange={() => handleToggle('monday', 'calib54')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Calibración 54º</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Target: 1m</span>
+                        <div style={{ marginBottom: '1rem', background: '#fcfcfc', padding: '1rem', borderRadius: '12px', border: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                <Target size={18} color="var(--primary)" />
+                                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Test de Precisión 54º</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                {[
+                                    { label: 'Corta Distancia (54º)', key: 'calibShort' },
+                                    { label: 'Media Distancia (54º)', key: 'calibMid' },
+                                    { label: 'Larga Distancia (P)', key: 'calibLong' }
+                                ].map((item) => (
+                                    <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ fontSize: '0.85rem', color: '#555' }}>{item.label}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="10"
+                                                value={progress.monday[item.key]}
+                                                onChange={(e) => handleInputChange('monday', item.key, e.target.value)}
+                                                style={{
+                                                    width: '50px',
+                                                    padding: '0.35rem',
+                                                    fontSize: '0.9rem',
+                                                    borderRadius: '8px',
+                                                    border: '2px solid',
+                                                    borderColor: getScoreColor(progress.monday[item.key]),
+                                                    textAlign: 'center',
+                                                    fontWeight: 700
+                                                }}
+                                            />
+                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>/ 10</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                         <div style={agendaLine}>
                             <input type="checkbox" checked={progress.monday.puttCircuit} onChange={() => handleToggle('monday', 'puttCircuit')} style={{ width: '20px', height: '20px' }} />
