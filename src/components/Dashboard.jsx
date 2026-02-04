@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Trophy, Target, Calendar, Clock, Plus, BarChart3, MapPin, Sparkles, TrendingDown, MessageSquare, Camera } from 'lucide-react';
+import { Trophy, Target, Calendar, Clock, Plus, BarChart3, MapPin, Sparkles, TrendingDown, MessageSquare, Camera, MousePointer2 } from 'lucide-react';
+import { calculateStableford, getPHCP } from '../lib/golfUtils';
 
 export default function Dashboard({ setActiveTab }) {
     const [stats, setStats] = useState({
@@ -38,7 +39,7 @@ export default function Dashboard({ setActiveTab }) {
     async function fetchStats() {
         setLoading(true);
         try {
-            const { data: rounds } = await supabase.from('rounds').select('score, triputts, stableford_points');
+            const { data: rounds } = await supabase.from('rounds').select('*');
             const { data: training } = await supabase.from('trainings').select('duration_mins');
             const { data: tourns, count: tournCount } = await supabase.from('tournaments')
                 .select('*', { count: 'exact' })
@@ -55,7 +56,13 @@ export default function Dashboard({ setActiveTab }) {
                 : '0';
 
             const avgStable = rounds?.length > 0
-                ? Math.round(rounds.reduce((acc, r) => acc + (r.stableford_points || 0), 0) / rounds.length)
+                ? Math.round(rounds.reduce((acc, r) => {
+                    // Recalculate if hole_data is available to ensure accuracy
+                    const pts = r.hole_data
+                        ? calculateStableford(r.hole_data, r.player_hcp || 40.9)
+                        : (r.stableford_points || 0);
+                    return acc + pts;
+                }, 0) / rounds.length)
                 : 0;
 
             const hours = training?.length > 0
@@ -132,18 +139,14 @@ export default function Dashboard({ setActiveTab }) {
 
     const statCards = [
         { label: 'Puntuación Media', value: stats.avgScore || 'N/A', icon: Target, color: '#386641' },
-        { label: 'Total Partidas', value: stats.totalRounds, icon: Trophy, color: '#6a994e' },
-        { label: 'Horas de Entreno', value: stats.trainingHours, icon: Clock, color: '#a7c957' },
-        { label: 'Media Stableford', value: `${stats.avgStableford} pts`, icon: BarChart3, color: '#1b4332' }
+        { label: 'Media Stableford', value: `${stats.avgStableford} pts`, icon: BarChart3, color: '#1b4332' },
+        { label: 'Triputts Medios', value: stats.avgTriputts, icon: MousePointer2, color: '#bc4749' },
+        { label: 'Total Partidas', value: stats.totalRounds, icon: Trophy, color: '#6a994e' }
     ];
 
     return (
         <div className="fade-in">
-            <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ flex: '1 1 300px' }}>
-                    <h1>Bienvenido de nuevo</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Aquí tienes un resumen de tu rendimiento.</p>
-                </div>
+            <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                 <button className="btn-primary" onClick={() => setActiveTab('games')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                     <Plus size={20} /> Nueva Partida
                 </button>
