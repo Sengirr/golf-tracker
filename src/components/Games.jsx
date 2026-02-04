@@ -1,4 +1,3 @@
-```javascript
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Plus, Trash2, Calendar, MapPin, Hash, Camera, Sparkles } from 'lucide-react';

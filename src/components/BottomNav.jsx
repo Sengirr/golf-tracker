@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Trophy, BookOpen, Dumbbell, Calendar as CalendarIcon } from 'lucide-react';
+import { LayoutDashboard, Trophy, BookOpen, Calendar as CalendarIcon } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab }) {
     const tabs = [
@@ -10,20 +10,21 @@ export default function BottomNav({ activeTab, setActiveTab }) {
     ];
 
     return (
-        <div style={{
+        <div className="bottom-nav-container" style={{
             position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            borderTop: '1px solid rgba(0,0,0,0.1)',
+            bottom: '1.5rem',
+            left: '1rem',
+            right: '1rem',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(15px)',
+            borderRadius: '24px',
             display: 'flex',
             justifyContent: 'space-around',
             alignItems: 'center',
-            padding: '0.75rem 0.5rem 1.5rem 0.5rem', // Extra bottom padding for safe area
-            zIndex: 2000,
-            boxShadow: '0 -4px 20px rgba(0,0,0,0.05)'
+            padding: '0.5rem',
+            zIndex: 3000,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            border: '1px solid rgba(255,255,255,0.2)'
         }}>
             {tabs.map(tab => (
                 <button
@@ -37,28 +38,32 @@ export default function BottomNav({ activeTab, setActiveTab }) {
                         alignItems: 'center',
                         gap: '0.25rem',
                         color: activeTab === tab.id ? 'var(--primary)' : 'var(--text-muted)',
-                        transition: 'all 0.2s ease',
-                        padding: '0.5rem',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        padding: '0.75rem 0.5rem',
                         flex: 1,
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        borderRadius: '16px'
                     }}
                 >
                     <div style={{
-                        padding: '0.5rem',
+                        padding: '0.4rem',
                         borderRadius: '12px',
-                        background: activeTab === tab.id ? 'rgba(56, 102, 65, 0.1)' : 'transparent',
+                        background: activeTab === tab.id ? 'var(--primary)' : 'transparent',
+                        color: activeTab === tab.id ? 'white' : 'inherit',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        transition: 'all 0.2s ease'
+                        transform: activeTab === tab.id ? 'scale(1.1)' : 'scale(1)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}>
-                        <tab.icon size={24} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                        <tab.icon size={22} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
                     </div>
                     <span style={{
-                        fontSize: '0.65rem',
-                        fontWeight: activeTab === tab.id ? 700 : 500,
+                        fontSize: '0.6rem',
+                        fontWeight: activeTab === tab.id ? 800 : 600,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.02em'
+                        letterSpacing: '0.04em',
+                        opacity: activeTab === tab.id ? 1 : 0.7
                     }}>
                         {tab.label}
                     </span>
