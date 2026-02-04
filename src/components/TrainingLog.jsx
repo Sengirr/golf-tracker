@@ -159,7 +159,7 @@ export default function TrainingLog() {
                 </div>
                 <div style={agendaLine}>
                     <input type="checkbox" checked={progress.tuesday.proClass} onChange={() => handleToggle('tuesday', 'proClass')} style={{ width: '20px', height: '20px' }} />
-                    <span style={{ fontWeight: 500 }}>Clase con el Pro</span>
+                    <span style={{ fontWeight: 500 }}>Clase con Ruben</span>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
                 </div>
                 <div style={agendaLine}>
