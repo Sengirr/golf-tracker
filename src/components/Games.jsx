@@ -14,13 +14,30 @@ const BENALMADENA_SCORECARD = {
 const getPHCP = (hcp) => {
     // Official EGA/RFEG formula for 9 holes: 
     // Playing Hcp (9h) = [ (Hcp * (Slope_18 / 113)) + (Rating_18 - Par_18) ] / 2
-    // Benalmadena 18h: Slope 63, Rating 50.1, Par 54
     const slope = 63;
     const rating = 50.1;
     const par = 54;
     const phcp18 = (hcp * (slope / 113)) + (rating - par);
-    // Note: We round according to RFEG standards for the final 9-hole value
-    return Math.round(phcp18 / 2); // 40.9 results in approx 9.5 -> 10 strokes
+    return Math.round(phcp18 / 2); // 40.9 -> 10 strokes
+};
+
+const calculateStableford = (holeData, playerHcp) => {
+    if (!holeData || !Array.isArray(holeData)) return 0;
+    const playingHCP = getPHCP(playerHcp);
+
+    return holeData.reduce((acc, hole, idx) => {
+        const par = BENALMADENA_SCORECARD.pars[idx];
+        const si = BENALMADENA_SCORECARD.si[idx];
+
+        let strokesAllowed = Math.floor(playingHCP / 9);
+        const extraStrokes = playingHCP % 9;
+        const difficultyRank = Math.ceil(si / 2);
+        if (difficultyRank <= extraStrokes) strokesAllowed += 1;
+
+        const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
+        const holePoints = Math.max(0, 2 + par - netScore);
+        return acc + holePoints;
+    }, 0);
 };
 
 export default function Games() {
@@ -70,38 +87,7 @@ export default function Games() {
 
         // Stableford Calculation - Adjusted for 9-hole P&P
         const hcp = parseFloat(formData.player_hcp) || 40.9;
-        const playingHCP = getPHCP(hcp);
-
-        const points = formData.hole_data.reduce((acc, hole, idx) => {
-            const par = BENALMADENA_SCORECARD.pars[idx];
-            const si = BENALMADENA_SCORECARD.si[idx];
-
-            // Distribution for 9 holes
-            // PlayingHCP (e.g. 10) means 1 stroke per hole (9) + 1 extra on SI rank 1
-            let strokesAllowed = Math.floor(playingHCP / 9);
-            const extraStrokes = playingHCP % 9;
-
-            // SI for Benalmadena are 13, 17, 11, 15, 3, 5, 9, 1, 7 (Odd numbers)
-            // We rank them from 1 to 9 (1 is SI 1, 2 is SI 3, 3 is SI 5...)
-            // The SI values are already the ranks for odd-numbered SIs.
-            // For example, SI 1 is the 1st most difficult, SI 3 is the 2nd most difficult, etc.
-            // So, we need to map the actual SI value to its rank.
-            // The provided SI array is already sorted by difficulty if we consider the values themselves.
-            // SI: [13, 17, 11, 15, 3, 5, 9, 1, 7]
-            // Sorted SI values: [1, 3, 5, 7, 9, 11, 13, 15, 17]
-            // Rank 1: SI 1
-            // Rank 2: SI 3
-            // Rank 3: SI 5
-            // ...
-            // Rank 9: SI 17
-            // The current `difficultyRank = Math.ceil(si / 2)` correctly maps SI 1 to 1, SI 3 to 2, SI 5 to 3, etc.
-            const difficultyRank = Math.ceil(si / 2);
-            if (difficultyRank <= extraStrokes) strokesAllowed += 1;
-
-            const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
-            const holePoints = Math.max(0, 2 + par - netScore);
-            return acc + holePoints;
-        }, 0);
+        const points = calculateStableford(formData.hole_data, hcp);
 
         finalData = {
             ...formData,
@@ -320,11 +306,9 @@ export default function Games() {
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
                                             <strong>Triputts:</strong> {round.triputts || 0}
                                         </span>
-                                        {round.stableford_points > 0 && (
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#386641' }}>
-                                                <strong>Stableford:</strong> {round.stableford_points} pts
-                                            </span>
-                                        )}
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#386641' }}>
+                                            <strong>Stableford:</strong> {round.hole_data ? calculateStableford(round.hole_data, round.player_hcp) : round.stableford_points} pts
+                                        </span>
                                     </div>
                                 </div>
                             </div>
