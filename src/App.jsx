@@ -28,15 +28,6 @@ function App() {
 
   return (
     <div className="fade-in">
-      <header className="mobile-only-header">
-        <div className="nav-logo">
-          <div className="nav-logo-icon">
-            <Flag size={20} fill="white" />
-          </div>
-          GOLFTRACKER
-        </div>
-      </header>
-
       <nav>
         <div className="nav-logo">
           <div className="nav-logo-icon">
