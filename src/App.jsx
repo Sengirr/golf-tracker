@@ -3,8 +3,10 @@ import Dashboard from './components/Dashboard';
 import Games from './components/Games';
 import Training from './components/Training';
 import Tournaments from './components/Tournaments';
+import TrainingLog from './components/TrainingLog';
+import BottomNav from './components/BottomNav';
 import { supabase } from './lib/supabase';
-import { LayoutDashboard, Trophy, Dumbbell, Calendar as CalendarIcon, Flag } from 'lucide-react';
+import { LayoutDashboard, Trophy, Dumbbell, Calendar as CalendarIcon, Flag, BookOpen } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -20,6 +22,7 @@ function App() {
     switch (activeTab) {
       case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
       case 'games': return <Games />;
+      case 'agenda': return <TrainingLog />;
       case 'training': return <Training />;
       case 'tournaments': return <Tournaments />;
       default: return <Dashboard setActiveTab={setActiveTab} />;
@@ -27,34 +30,23 @@ function App() {
   };
 
   return (
-    <div className="fade-in">
-      <nav>
+    <div className="fade-in" style={{ paddingBottom: '80px' }}>
+      <nav style={{ justifyContent: 'center', position: 'sticky', top: 0, zIndex: 1000, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)' }}>
         <div className="nav-logo">
           <div className="nav-logo-icon">
             <Flag size={20} fill="white" />
           </div>
           GOLFTRACKER
         </div>
-        <div className="nav-links">
-          {tabs.map(tab => (
-            <a
-              key={tab.id}
-              href="#"
-              className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={(e) => { e.preventDefault(); setActiveTab(tab.id); }}
-            >
-              <tab.icon size={20} />
-              <span>{tab.label}</span>
-            </a>
-          ))}
-        </div>
       </nav>
 
-      <main className="container">
+      <main className="container" style={{ paddingTop: '1.5rem', marginBottom: '4rem' }}>
         {renderContent()}
       </main>
 
-      <footer style={{ marginTop: '4rem', padding: '2rem', textAlign: 'center', borderTop: '1px solid #e0e0e0', color: 'var(--text-muted)' }}>
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <footer style={{ marginTop: '2rem', padding: '2rem', textAlign: 'center', borderTop: '1px solid #e0e0e0', color: 'var(--text-muted)', fontSize: '0.8rem', paddingBottom: '100px' }}>
         <p>© 2026 GolfTracker Premium. Juega con confianza.</p>
       </footer>
     </div>
