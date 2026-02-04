@@ -18,7 +18,7 @@ export default function Games() {
         score: '',
         holes_played: 9,
         triputts: 0,
-        player_hcp: 40.9,
+        player_hcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
         date: new Date().toISOString().split('T')[0],
         notes: '',
         hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false })
@@ -96,7 +96,7 @@ export default function Games() {
                 score: '',
                 holes_played: 9,
                 triputts: 0,
-                player_hcp: 0,
+                player_hcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
                 date: new Date().toISOString().split('T')[0],
                 notes: '',
                 hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false })

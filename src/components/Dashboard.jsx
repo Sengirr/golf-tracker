@@ -14,6 +14,11 @@ export default function Dashboard({ setActiveTab }) {
         nextTournament: null
     });
     const [loading, setLoading] = useState(true);
+    const [showSettings, setShowSettings] = useState(false);
+    const [hcpSettings, setHcpSettings] = useState({
+        current: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
+        target: parseFloat(localStorage.getItem('target_hcp')) || 36.0
+    });
     const [showChat, setShowChat] = useState(false);
     const [chatInput, setChatInput] = useState('');
     const [messages, setMessages] = useState([
@@ -59,16 +64,18 @@ export default function Dashboard({ setActiveTab }) {
 
             // AI Logic - Analyzing trends
             let recommendation = "¡Sigue así! Estás cogiendo ritmo.";
+            const avgScoreNum = rounds?.length > 0 ? (rounds.reduce((acc, r) => acc + r.score, 0) / rounds.length) : 0;
+
             if (avgTri > 2.5) {
                 recommendation = "La IA detecta fatiga en el green. Dedica los próximos 3 entrenos exclusivamente a putts de 2 metros.";
-            } else if (avg > 90) {
+            } else if (avgScoreNum > 90) {
                 recommendation = "Tu puntuación es estable, pero podrías bajar 5 golpes si mejoras la precisión desde el tee en el hoyo 5.";
             } else if (rounds?.length < 3) {
                 recommendation = "Necesito 3 partidas más para darte consejos técnicos precisos. ¡Sal al campo!";
             }
 
-            // HCP Prediction logic (Simplified for 40.9)
-            const currentHCP = 40.9;
+            // HCP Prediction logic
+            const currentHCP = hcpSettings.current;
             const hcpGoal = (avgStable > 18) ? (currentHCP - (avgStable - 18) * 0.5).toFixed(1) : currentHCP;
             const predictionText = avgStable > 18
                 ? `Si mantienes este nivel, tu HCP bajará a ${hcpGoal} en tu próxima competición.`
@@ -113,6 +120,14 @@ export default function Dashboard({ setActiveTab }) {
             }
             setMessages([...newMessages, { role: 'caddie', text: response }]);
         }, 600);
+    };
+
+    const handleSaveSettings = (e) => {
+        e.preventDefault();
+        localStorage.setItem('current_hcp', hcpSettings.current);
+        localStorage.setItem('target_hcp', hcpSettings.target);
+        setShowSettings(false);
+        fetchStats(); // Refresh prediction
     };
 
     const statCards = [
@@ -175,23 +190,31 @@ export default function Dashboard({ setActiveTab }) {
 
                 {/* HCP Predictor Card */}
                 <div className="card" style={{ background: 'white' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                        <div style={{ background: '#e3f2fd', color: '#1976d2', padding: '0.5rem', borderRadius: '8px' }}>
-                            <TrendingDown size={20} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ background: '#e3f2fd', color: '#1976d2', padding: '0.5rem', borderRadius: '8px' }}>
+                                <TrendingDown size={20} />
+                            </div>
+                            <h3 style={{ margin: 0 }}>Predictor de HCP</h3>
                         </div>
-                        <h3 style={{ margin: 0 }}>Predictor de HCP</h3>
+                        <button
+                            onClick={() => setShowSettings(true)}
+                            style={{ background: 'none', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                        >
+                            Editar Objetivos
+                        </button>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1rem' }}>
                         <div style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>ACTUAL</p>
-                            <h2 style={{ margin: 0, color: 'var(--primary)' }}>40.9</h2>
+                            <h2 style={{ margin: 0, color: 'var(--primary)' }}>{hcpSettings.current}</h2>
                         </div>
                         <div style={{ flex: 1, height: '4px', background: '#eee', borderRadius: '2px', position: 'relative' }}>
-                            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '40%', background: 'var(--accent)', borderRadius: '2px' }}></div>
+                            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${Math.min(100, Math.max(0, (45 - hcpSettings.current) * 4))}%`, background: 'var(--accent)', borderRadius: '2px' }}></div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>OBJETIVO</p>
-                            <h2 style={{ margin: 0, color: 'var(--accent)' }}>36.0</h2>
+                            <h2 style={{ margin: 0, color: 'var(--accent)' }}>{hcpSettings.target}</h2>
                         </div>
                     </div>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -247,6 +270,41 @@ export default function Dashboard({ setActiveTab }) {
                     </div>
                 </div>
             </div>
+            {/* Settings Modal */}
+            {showSettings && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div className="card" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ margin: 0 }}>Configuración de Objetivos</h3>
+                            <button onClick={() => setShowSettings(false)} style={{ background: 'none', color: 'var(--text)', fontSize: '1.5rem' }}>&times;</button>
+                        </div>
+                        <form onSubmit={handleSaveSettings}>
+                            <div className="input-group">
+                                <label>Hándicap Actual</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    value={hcpSettings.current}
+                                    onChange={(e) => setHcpSettings({ ...hcpSettings, current: parseFloat(e.target.value) })}
+                                />
+                            </div>
+                            <div className="input-group" style={{ marginTop: '1rem' }}>
+                                <label>Hándicap Objetivo</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    value={hcpSettings.target}
+                                    onChange={(e) => setHcpSettings({ ...hcpSettings, target: parseFloat(e.target.value) })}
+                                />
+                            </div>
+                            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
+                                Guardar Cambios
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {/* Strategy Chat Modal */}
             {showChat && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', z- index: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
@@ -295,8 +353,6 @@ export default function Dashboard({ setActiveTab }) {
                 </div>
             </div>
         </div>
-    )
-}
         </div >
     );
 }
