@@ -8,6 +8,7 @@ export default function Dashboard({ setActiveTab }) {
         totalRounds: 0,
         trainingHours: 0,
         avgTriputts: 0,
+        avgStableford: 0,
         nextTournament: null
     });
     const [loading, setLoading] = useState(true);
@@ -25,7 +26,7 @@ export default function Dashboard({ setActiveTab }) {
     async function fetchStats() {
         setLoading(true);
         try {
-            const { data: rounds } = await supabase.from('rounds').select('score, triputts');
+            const { data: rounds } = await supabase.from('rounds').select('score, triputts, stableford_points');
             const { data: training } = await supabase.from('trainings').select('duration_mins');
             const { data: tourns, count: tournCount } = await supabase.from('tournaments')
                 .select('*', { count: 'exact' })
@@ -41,6 +42,10 @@ export default function Dashboard({ setActiveTab }) {
                 ? (rounds.reduce((acc, r) => acc + (r.triputts || 0), 0) / rounds.length).toFixed(1)
                 : '0';
 
+            const avgStable = rounds?.length > 0
+                ? Math.round(rounds.reduce((acc, r) => acc + (r.stableford_points || 0), 0) / rounds.length)
+                : 0;
+
             const hours = training?.length > 0
                 ? Math.round(training.reduce((acc, t) => acc + t.duration_mins, 0) / 60)
                 : 0;
@@ -50,6 +55,7 @@ export default function Dashboard({ setActiveTab }) {
                 totalRounds: rounds?.length || 0,
                 trainingHours: hours,
                 avgTriputts: avgTri,
+                avgStableford: avgStable,
                 nextTournament: tourns?.[0] || null
             });
         } catch (error) {
@@ -89,13 +95,13 @@ export default function Dashboard({ setActiveTab }) {
                         </div>
                     </div>
                 ))}
-                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                    <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: `#bc474915`, color: '#bc4749' }}>
-                        <Target size={24} />
+                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'var(--primary)', color: 'white' }}>
+                    <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: `rgba(255,255,255,0.2)`, color: 'white' }}>
+                        <Trophy size={24} />
                     </div>
                     <div>
-                        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-muted)' }}>Triputts Medios</p>
-                        <h2 style={{ margin: 0, fontSize: '1.5rem', color: stats.avgTriputts > 2 ? '#bc4749' : 'inherit' }}>{stats.avgTriputts}</h2>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 600, opacity: 0.9 }}>Puntos Stableford</p>
+                        <h2 style={{ margin: 0, fontSize: '1.5rem', color: 'white' }}>{stats.avgStableford} pts</h2>
                     </div>
                 </div>
             </div>
