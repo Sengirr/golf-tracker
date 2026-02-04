@@ -6,7 +6,7 @@ const BENALMADENA_SCORECARD = {
     name: 'Benalmádena Golf',
     holes: 9,
     pars: [3, 3, 3, 3, 3, 3, 3, 3, 3],
-    si: [13, 17, 11, 15, 3, 5, 9, 1, 7],
+    si: [13, 17, 11, 15, 3, 5, 9, 1, 7], // 17 is Hole 2, 1 is Hole 8
     slope: 63,
     rating: 25.1
 };
@@ -22,10 +22,11 @@ const getPHCP = (hcp) => {
 };
 
 const getHoleDifficultyRank = (si) => {
-    // In Benalmadena 9-hole P&P, SI values are odd numbers: 1, 3, 5, 7, 9, 11, 13, 15, 17
-    // RFEG Ranking for 9 holes: SI 17 is the 1st most difficult (rank 1), SI 1 is the 9th (rank 9).
-    // Mapping: 17->1, 15->2, 13->3, 11->4, 9->5, 7->6, 5->7, 3->8, 1->9
-    const siList = [17, 15, 13, 11, 9, 7, 5, 3, 1];
+    // In Benalmadena 9-hole P&P, SI values are: 1, 3, 5, 7, 9, 11, 13, 15, 17
+    // According to the user, Hole 8 (SI 1) is the most difficult (Rank 1).
+    // Hole 2 (SI 17) is the 9th most difficult (Rank 9).
+    // Mapping: 1->1, 3->2, 5->3, 7->4, 9->5, 11->6, 13->7, 15->8, 17->9
+    const siList = [1, 3, 5, 7, 9, 11, 13, 15, 17];
     return siList.indexOf(si) + 1;
 };
 

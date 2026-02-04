@@ -1,20 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, ChevronRight, Award, Trophy } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Award, Trophy, ChevronLeft, Calendar } from 'lucide-react';
 
 export default function TrainingLog() {
+    // Helper to get ISO week ID (e.g., 2024-W06)
+    const getWeekId = (date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        const year = d.getFullYear();
+        const week = Math.ceil((((d - new Date(year, 0, 1)) / 86400000) + 1) / 7);
+        return `${year}-W${week.toString().padStart(2, '0')}`;
+    };
+
+    const [currentWeekId, setCurrentWeekId] = useState(getWeekId(new Date()));
     const [progress, setProgress] = useState(() => {
-        const saved = localStorage.getItem('training_agenda');
-        return saved ? JSON.parse(saved) : {
+        const saved = localStorage.getItem(`training_agenda_${getWeekId(new Date())}`);
+        return saved ? JSON.parse(saved) : getDefaultProgress();
+    });
+
+    function getDefaultProgress() {
+        return {
             monday: { calib54: false, puttCircuit: false, puttScore: '' },
             tuesday: { proClass: false, towelDrill: '' },
             wednesday: { rule60m: '' },
             thursday: { freePlay: false, approachRodado: false, puttEscalera: false }
         };
-    });
+    }
 
+    // Effect to load data when week changes
     useEffect(() => {
-        localStorage.setItem('training_agenda', JSON.stringify(progress));
-    }, [progress]);
+        const saved = localStorage.getItem(`training_agenda_${currentWeekId}`);
+        if (saved) {
+            setProgress(JSON.parse(saved));
+        } else {
+            setProgress(getDefaultProgress());
+        }
+    }, [currentWeekId]);
+
+    // Effect to persist data locally
+    useEffect(() => {
+        localStorage.setItem(`training_agenda_${currentWeekId}`, JSON.stringify(progress));
+    }, [progress, currentWeekId]);
+
+    const changeWeek = (offset) => {
+        const [year, weekStr] = currentWeekId.split('-W');
+        const week = parseInt(weekStr);
+        let d = new Date(parseInt(year), 0, 1);
+        // Approximation for jumping weeks
+        d.setDate(d.getDate() + (week - 1) * 7 + (offset * 7) + 3);
+        setCurrentWeekId(getWeekId(d));
+    };
 
     const isDayComplete = (day) => {
         switch (day) {
@@ -61,9 +96,19 @@ export default function TrainingLog() {
 
     return (
         <div className="fade-in" style={{ paddingBottom: '100px' }}>
-            <div style={{ marginBottom: '2rem' }}>
-                <h1>Agenda Semanal</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Tu hoja de ruta para bajar el hándicap.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                    <h1>Agenda de Entreno</h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Tu hoja de ruta semanal para bajar el hándicap.</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'white', padding: '0.5rem 1rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <button onClick={() => changeWeek(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.25rem' }}><ChevronLeft size={20} /></button>
+                    <div style={{ textAlign: 'center', minWidth: '100px' }}>
+                        <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', fontWeight: 700, textTransform: 'uppercase' }}>Semana</span>
+                        <span style={{ fontWeight: 800, fontSize: '1rem' }}>{currentWeekId.replace('-W', ' / ')}</span>
+                    </div>
+                    <button onClick={() => changeWeek(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.25rem' }}><ChevronRight size={20} /></button>
+                </div>
             </div>
 
             {/* MONDAY */}
@@ -89,11 +134,6 @@ export default function TrainingLog() {
                         />
                     </div>
                 </div>
-                {isDayComplete('monday') && (
-                    <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#e8f5e9', borderRadius: '8px', textAlign: 'center', fontSize: '0.8rem', color: '#2e7d32' }}>
-                        🎉 ¡Gran comienzo de semana! La precisión se construye hoy.
-                    </div>
-                )}
             </div>
 
             {/* TUESDAY */}
@@ -121,11 +161,6 @@ export default function TrainingLog() {
                         </div>
                     </div>
                 </div>
-                {isDayComplete('tuesday') && (
-                    <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#e8f5e9', borderRadius: '8px', textAlign: 'center', fontSize: '0.8rem', color: '#2e7d32' }}>
-                        ⭐️ Escuchando al Pro y afinando el impacto. ¡Sigue así!
-                    </div>
-                )}
             </div>
 
             {/* WEDNESDAY */}
@@ -147,11 +182,6 @@ export default function TrainingLog() {
                     </div>
                 </div>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0.5rem 0 0' }}>💡 Indica cuántas veces respetaste la regla de no atacar a menos de 60m.</p>
-                {isDayComplete('wednesday') && (
-                    <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#e8f5e9', borderRadius: '8px', textAlign: 'center', fontSize: '0.8rem', color: '#2e7d32' }}>
-                        ⛳️ La estrategia en el campo es lo que realmente baja el hándicap.
-                    </div>
-                )}
             </div>
 
             {/* THURSDAY */}
@@ -172,11 +202,6 @@ export default function TrainingLog() {
                     <input type="checkbox" checked={progress.thursday.puttEscalera} onChange={() => handleToggle('thursday', 'puttEscalera')} />
                     <span>Putt Escalera</span>
                 </div>
-                {isDayComplete('thursday') && (
-                    <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#e8f5e9', borderRadius: '8px', textAlign: 'center', fontSize: '0.8rem', color: '#2e7d32' }}>
-                        🏆 ¡Semana de entrenos completada! Estás un paso más cerca de tu objetivo.
-                    </div>
-                )}
             </div>
         </div>
     );

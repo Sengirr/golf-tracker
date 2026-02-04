@@ -14,7 +14,7 @@ function App() {
   const tabs = [
     { id: 'dashboard', label: 'Panel', icon: LayoutDashboard },
     { id: 'games', label: 'Partidas', icon: Trophy },
-    { id: 'training', label: 'Entrenos', icon: Dumbbell },
+    { id: 'agenda', label: 'Agenda', icon: BookOpen },
     { id: 'tournaments', label: 'Torneos', icon: CalendarIcon }
   ];
 
@@ -23,7 +23,6 @@ function App() {
       case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
       case 'games': return <Games />;
       case 'agenda': return <TrainingLog />;
-      case 'training': return <Training />;
       case 'tournaments': return <Tournaments />;
       default: return <Dashboard setActiveTab={setActiveTab} />;
     }
