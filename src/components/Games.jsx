@@ -113,7 +113,6 @@ export default function Games() {
             gir: Math.random() > 0.5
         }));
         setFormData({ ...formData, hole_data: simulatedHoles });
-        setEntryMode('detailed');
         alert('IA Vision: Se han extraído los datos de la tarjeta con éxito.');
     }
 
@@ -231,7 +230,6 @@ export default function Games() {
                                     </table>
                                 </div>
                             </div>
-                            )}
 
                             <div className="input-group">
                                 <label>Fecha</label>
