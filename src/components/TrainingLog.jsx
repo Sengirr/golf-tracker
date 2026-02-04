@@ -225,6 +225,3 @@ export default function TrainingLog() {
         </div>
     );
 }
-        </div >
-    );
-}
