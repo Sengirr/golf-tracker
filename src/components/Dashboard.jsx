@@ -353,6 +353,7 @@ export default function Dashboard({ setActiveTab }) {
                         </div>
                     </div>
                 </div>
-        </div >
+            )}
+        </div>
     );
 }
