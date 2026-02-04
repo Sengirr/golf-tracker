@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Trophy, Target, Calendar, Clock, Plus, BarChart3, MapPin } from 'lucide-react';
+import { Trophy, Target, Calendar, Clock, Plus, BarChart3, MapPin, Sparkles, TrendingDown, MessageSquare, Camera } from 'lucide-react';
 
 export default function Dashboard({ setActiveTab }) {
     const [stats, setStats] = useState({
@@ -9,6 +9,8 @@ export default function Dashboard({ setActiveTab }) {
         trainingHours: 0,
         avgTriputts: 0,
         avgStableford: 0,
+        aiRecommendation: '',
+        hcpPrediction: '',
         nextTournament: null
     });
     const [loading, setLoading] = useState(true);
@@ -50,12 +52,31 @@ export default function Dashboard({ setActiveTab }) {
                 ? Math.round(training.reduce((acc, t) => acc + t.duration_mins, 0) / 60)
                 : 0;
 
+            // AI Logic - Analyzing trends
+            let recommendation = "¡Sigue así! Estás cogiendo ritmo.";
+            if (avgTri > 2.5) {
+                recommendation = "La IA detecta fatiga en el green. Dedica los próximos 3 entrenos exclusivamente a putts de 2 metros.";
+            } else if (avg > 90) {
+                recommendation = "Tu puntuación es estable, pero podrías bajar 5 golpes si mejoras la precisión desde el tee en el hoyo 5.";
+            } else if (rounds?.length < 3) {
+                recommendation = "Necesito 3 partidas más para darte consejos técnicos precisos. ¡Sal al campo!";
+            }
+
+            // HCP Prediction logic (Simplified for 40.9)
+            const currentHCP = 40.9;
+            const hcpGoal = (avgStable > 18) ? (currentHCP - (avgStable - 18) * 0.5).toFixed(1) : currentHCP;
+            const predictionText = avgStable > 18
+                ? `Si mantienes este nivel, tu HCP bajará a ${hcpGoal} en tu próxima competición.`
+                : "Mantén la constancia en el campo para empezar a bajar tu handicap.";
+
             setStats({
                 avgScore: avg,
                 totalRounds: rounds?.length || 0,
                 trainingHours: hours,
                 avgTriputts: avgTri,
                 avgStableford: avgStable,
+                aiRecommendation: recommendation,
+                hcpPrediction: predictionText,
                 nextTournament: tourns?.[0] || null
             });
         } catch (error) {
@@ -98,7 +119,57 @@ export default function Dashboard({ setActiveTab }) {
                 ))}
             </div>
 
-            <div className="grid grid-cols-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))' }}>
+            <div className="grid grid-cols-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+                {/* AI Caddie Card */}
+                <div className="card" style={{ border: '2px solid var(--accent)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
+                        <Sparkles size={100} color="var(--accent)" />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <div style={{ background: 'var(--accent)', color: 'var(--primary-dark)', padding: '0.5rem', borderRadius: '8px' }}>
+                            <Sparkles size={20} />
+                        </div>
+                        <h3 style={{ margin: 0 }}>AI Caddie - Consejos</h3>
+                    </div>
+                    <p style={{ fontSize: '1.1rem', fontWeight: 500, lineHeight: 1.5, color: 'var(--primary-dark)' }}>
+                        "{stats.aiRecommendation}"
+                    </p>
+                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+                        <button className="btn-link" onClick={() => setActiveTab('games')} style={{ fontSize: '0.8rem', padding: '0.5rem', background: '#e8f5e9' }}>
+                            <Camera size={14} style={{ marginRight: '4px' }} /> Escanear Tarjeta
+                        </button>
+                        <button className="btn-link" onClick={() => setActiveTab('games')} style={{ fontSize: '0.8rem', padding: '0.5rem', background: '#e3f2fd' }}>
+                            <MessageSquare size={14} style={{ marginRight: '4px' }} /> Hablar con Caddie
+                        </button>
+                    </div>
+                </div>
+
+                {/* HCP Predictor Card */}
+                <div className="card" style={{ background: 'white' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <div style={{ background: '#e3f2fd', color: '#1976d2', padding: '0.5rem', borderRadius: '8px' }}>
+                            <TrendingDown size={20} />
+                        </div>
+                        <h3 style={{ margin: 0 }}>Predictor de HCP</h3>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1rem' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>ACTUAL</p>
+                            <h2 style={{ margin: 0, color: 'var(--primary)' }}>40.9</h2>
+                        </div>
+                        <div style={{ flex: 1, height: '4px', background: '#eee', borderRadius: '2px', position: 'relative' }}>
+                            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '40%', background: 'var(--accent)', borderRadius: '2px' }}></div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>OBJETIVO</p>
+                            <h2 style={{ margin: 0, color: 'var(--accent)' }}>36.0</h2>
+                        </div>
+                    </div>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        {stats.hcpPrediction}
+                    </p>
+                </div>
+
                 <div className="card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                         <BarChart3 size={20} color="var(--primary)" />
