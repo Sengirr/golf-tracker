@@ -24,7 +24,7 @@ export default function TrainingLog() {
             monday: { calibShort: '', calibMid: '', calibLong: '', puttCircuit: false, puttScore: '' },
             tuesday: { proClass: false, towelMisses: '', towelTotal: '10' },
             wednesday: { fieldDay: false },
-            thursday: { freePlay: false, approachSuccess: 0, approachTotal: 30, stairsSuccess: 0, stairsTotal: 5 }
+            thursday: { freePlay: false, approachSuccess: 0, approachTotal: 30, stairsSuccess: 0, stairsTotal: 27 }
         };
     }
 
@@ -333,10 +333,10 @@ export default function TrainingLog() {
                         </div>
 
                         {/* STAIRS COUNTER */}
-                        <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto', borderBottom: 'none' }}>
+                        <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto', borderBottom: 'none', paddingBottom: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <span style={{ fontWeight: 500 }}>Putt Escalera</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Escaleras Completas</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Aciertos Totales</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
                                 <button
@@ -345,8 +345,15 @@ export default function TrainingLog() {
                                 >
                                     <Minus size={14} />
                                 </button>
-                                <div style={{ minWidth: '60px', textAlign: 'center' }}>
-                                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary-dark)' }}>{progress.thursday.stairsSuccess}</span>
+                                <div style={{ minWidth: '70px', textAlign: 'center' }}>
+                                    <span style={{
+                                        fontWeight: 800,
+                                        fontSize: '1.2rem',
+                                        color: parseInt(progress.thursday.stairsSuccess) > 20 ? '#D4AF37' : 'var(--primary-dark)',
+                                        textShadow: parseInt(progress.thursday.stairsSuccess) > 20 ? '0 0 10px rgba(212, 175, 55, 0.3)' : 'none'
+                                    }}>
+                                        {progress.thursday.stairsSuccess}
+                                    </span>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / {progress.thursday.stairsTotal}</span>
                                 </div>
                                 <button
@@ -356,6 +363,12 @@ export default function TrainingLog() {
                                     <Plus size={14} />
                                 </button>
                             </div>
+                        </div>
+                        <div style={{ paddingLeft: '38px', marginTop: '-0.2rem' }}>
+                            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <Sparkles size={12} color="#D4AF37" />
+                                <span>Llano, Subida, Bajada (27 bolas). **Meta Hcp 40: > 15 aciertos.**</span>
+                            </p>
                         </div>
                     </div>
                 </>
