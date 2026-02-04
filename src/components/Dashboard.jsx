@@ -160,12 +160,12 @@ export default function Dashboard({ setActiveTab }) {
 
             <div className="grid grid-cols-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginBottom: '3rem' }}>
                 {statCards.map((stat, idx) => (
-                    <div key={idx} className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: stat.label === 'Media Stableford' ? 'var(--primary)' : 'var(--glass)', color: stat.label === 'Media Stableford' ? 'white' : 'inherit' }}>
-                        <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: stat.label === 'Media Stableford' ? 'rgba(255,255,255,0.2)' : `${stat.color}15`, color: stat.label === 'Media Stableford' ? 'white' : stat.color }}>
+                    <div key={idx} className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'var(--glass)', color: 'inherit' }}>
+                        <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: `${stat.color}15`, color: stat.color }}>
                             <stat.icon size={24} />
                         </div>
                         <div>
-                            <p style={{ fontSize: '0.875rem', fontWeight: 600, color: stat.label === 'Media Stableford' ? 'rgba(255,255,255,0.9)' : 'var(--text-muted)' }}>{stat.label}</p>
+                            <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-muted)' }}>{stat.label}</p>
                             <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{stat.value}</h2>
                         </div>
                     </div>
