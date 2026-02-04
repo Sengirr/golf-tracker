@@ -265,9 +265,17 @@ export default function Games() {
                     rounds.map(round => (
                         <div key={round.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                                <div style={{ background: 'var(--primary)', color: 'white', width: '60px', height: '60px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>GOLPES</span>
-                                    <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>{round.score}</span>
+                                <div style={{ background: 'var(--primary)', color: 'white', width: '80px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', overflow: 'hidden' }}>
+                                    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', width: '100%', padding: '0.4rem 0.25rem' }}>
+                                        <span style={{ fontSize: '0.6rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>BRUTOS</span>
+                                        <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{round.score}</span>
+                                    </div>
+                                    <div style={{ width: '100%', padding: '0.4rem 0.25rem', background: 'rgba(255,255,255,0.1)' }}>
+                                        <span style={{ fontSize: '0.6rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>NETOS</span>
+                                        <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+                                            {Math.round(round.score - (round.player_hcp * (round.holes_played / 18)))}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div>
                                     <h3 style={{ margin: 0 }}>{round.course_name}</h3>
