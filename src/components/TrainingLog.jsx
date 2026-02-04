@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, ChevronRight, Award, Trophy, ChevronLeft, Calendar } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Award, Trophy, ChevronLeft, Calendar, Sparkles } from 'lucide-react';
 
 export default function TrainingLog() {
     // Helper to get ISO week ID (e.g., 2024-W06)
