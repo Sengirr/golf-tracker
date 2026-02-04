@@ -316,6 +316,8 @@ export default function TrainingLog() {
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Control</span>
                         </div>
                     </div>
-                </div>
-            );
+                </>
+            ) : null}
+        </div>
+    );
 }
