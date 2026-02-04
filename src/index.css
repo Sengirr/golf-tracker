@@ -164,6 +164,24 @@ nav {
   z-index: 100;
 }
 
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.nav-logo-icon {
+  background: var(--primary);
+  color: white;
+  padding: 6px;
+  borderRadius: 8px;
+  display: flex;
+}
+
 .nav-links {
   display: flex;
   gap: 1.5rem;
@@ -202,8 +220,13 @@ nav {
   }
 
   .nav-logo {
-    display: none;
-    /* Hide logo in the bottom bar */
+    display: none !important;
+    /* Force hide logo in the bottom bar */
+  }
+
+  .mobile-only-header .nav-logo {
+    display: flex !important;
+    /* But show it in the top header */
   }
 
   .nav-links {

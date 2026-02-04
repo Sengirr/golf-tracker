@@ -28,9 +28,9 @@ function App() {
 
   return (
     <div className="fade-in">
-      <header className="mobile-only-header" style={{ padding: '1rem 1.5rem', background: 'white', display: 'none', justifyContent: 'center', borderBottom: '1px solid #eee' }}>
-        <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, color: 'var(--primary)', fontSize: '1.25rem' }}>
-          <div style={{ background: 'var(--primary)', color: 'white', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+      <header className="mobile-only-header">
+        <div className="nav-logo">
+          <div className="nav-logo-icon">
             <Flag size={20} fill="white" />
           </div>
           GOLFTRACKER
@@ -38,8 +38,8 @@ function App() {
       </header>
 
       <nav>
-        <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, color: 'var(--primary)', fontSize: '1.25rem' }}>
-          <div style={{ background: 'var(--primary)', color: 'white', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+        <div className="nav-logo">
+          <div className="nav-logo-icon">
             <Flag size={20} fill="white" />
           </div>
           GOLFTRACKER
