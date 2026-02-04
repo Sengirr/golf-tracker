@@ -10,8 +10,14 @@ export default function Tournaments() {
         name: '',
         course: '',
         date: new Date().toISOString().split('T')[0],
-        status: 'Interested'
+        status: 'Interesado'
     });
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
 
     useEffect(() => {
         fetchTournaments();
@@ -58,12 +64,12 @@ export default function Tournaments() {
 
     return (
         <div className="fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                 <div>
                     <h1>Calendario de Torneos</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Planifica tu temporada competitiva.</p>
                 </div>
-                <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                     <Plus size={20} /> {showForm ? 'Cancelar' : 'Añadir Torneo'}
                 </button>
             </div>
@@ -132,19 +138,21 @@ export default function Tournaments() {
                                     <Calendar size={24} />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0 }}>{tourney.name}</h3>
-                                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {tourney.course}</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {tourney.date}</span>
-                                        <span style={{
-                                            padding: '2px 8px',
-                                            borderRadius: '4px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 700,
-                                            ...getStatusStyle(tourney.status)
-                                        }}>
-                                            {tourney.status.toUpperCase()}
-                                        </span>
+                                    <div>
+                                        <h3 style={{ margin: 0 }}>{tourney.name}</h3>
+                                        <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {tourney.course}</span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {formatDate(tourney.date)}</span>
+                                            <span style={{
+                                                padding: '2px 8px',
+                                                borderRadius: '4px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
+                                                ...getStatusStyle(tourney.status)
+                                            }}>
+                                                {tourney.status.toUpperCase()}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

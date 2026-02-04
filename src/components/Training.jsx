@@ -13,6 +13,12 @@ export default function Training() {
         date: new Date().toISOString().split('T')[0]
     });
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
     useEffect(() => {
         fetchSessions();
     }, []);
@@ -50,12 +56,12 @@ export default function Training() {
 
     return (
         <div className="fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                 <div>
                     <h1>Registros de Entrenamiento</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Domina el juego mediante la práctica constante.</p>
                 </div>
-                <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                     <Plus size={20} /> {showForm ? 'Cancelar' : 'Registrar Sesión'}
                 </button>
             </div>
@@ -125,10 +131,13 @@ export default function Training() {
                                     <Dumbbell size={24} />
                                 </div>
                                 <div>
-                                    <h3 style={{ margin: 0 }}>{session.training_type}</h3>
-                                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {session.duration_mins} min</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Target size={14} /> {session.focus || 'Práctica general'}</span>
+                                    <div>
+                                        <h3 style={{ margin: 0 }}>{session.training_type}</h3>
+                                        <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {session.duration_mins} min</span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {formatDate(session.date)}</span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Target size={14} /> {session.focus || 'Práctica general'}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

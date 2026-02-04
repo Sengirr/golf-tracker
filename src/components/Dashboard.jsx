@@ -12,6 +12,12 @@ export default function Dashboard({ setActiveTab }) {
     });
     const [loading, setLoading] = useState(true);
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
     useEffect(() => {
         fetchStats();
     }, []);
@@ -58,12 +64,12 @@ export default function Dashboard({ setActiveTab }) {
 
     return (
         <div className="fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <div>
+            <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+                <div style={{ flex: '1 1 300px' }}>
                     <h1>Bienvenido de nuevo</h1>
                     <p style={{ color: 'var(--text-muted)' }}>Aquí tienes un resumen de tu rendimiento.</p>
                 </div>
-                <button className="btn-primary" onClick={() => setActiveTab('games')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button className="btn-primary" onClick={() => setActiveTab('games')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                     <Plus size={20} /> Nueva Partida
                 </button>
             </div>
@@ -102,7 +108,7 @@ export default function Dashboard({ setActiveTab }) {
                             <p style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{stats.nextTournament.name}</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', opacity: 0.9 }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={16} /> {stats.nextTournament.course}</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={16} /> {stats.nextTournament.date}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={16} /> {formatDate(stats.nextTournament.date)}</span>
                             </div>
                             <button
                                 className="btn-primary"

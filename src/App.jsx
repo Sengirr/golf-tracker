@@ -49,7 +49,6 @@ function App() {
             </a>
           ))}
         </div>
-        <div style={{ width: '100px' }}></div> {/* Spacer for balance */}
       </nav>
 
       <main className="container">
