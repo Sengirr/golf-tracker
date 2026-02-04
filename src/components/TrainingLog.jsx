@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { CheckCircle2, ChevronRight, Award, Trophy, ChevronLeft, Calendar, Sparkles, Loader2, Target } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Award, Trophy, ChevronLeft, Calendar, Sparkles, Loader2, Target, Plus, Minus } from 'lucide-react';
 
 export default function TrainingLog() {
     // Helper to get ISO week ID (e.g., 2024-W06)
@@ -24,7 +24,7 @@ export default function TrainingLog() {
             monday: { calibShort: '', calibMid: '', calibLong: '', puttCircuit: false, puttScore: '' },
             tuesday: { proClass: false, towelMisses: '', towelTotal: '10' },
             wednesday: { fieldDay: false },
-            thursday: { freePlay: false, approachRodado: false, puttEscalera: false }
+            thursday: { freePlay: false, approachSuccess: 0, approachTotal: 30, stairsSuccess: 0, stairsTotal: 5 }
         };
     }
 
@@ -116,7 +116,7 @@ export default function TrainingLog() {
             case 'monday': return progress.monday.calibShort !== '' && progress.monday.calibMid !== '' && progress.monday.calibLong !== '' && progress.monday.puttCircuit;
             case 'tuesday': return progress.tuesday.proClass && progress.tuesday.towelMisses !== '';
             case 'wednesday': return progress.wednesday.fieldDay;
-            case 'thursday': return progress.thursday.freePlay && progress.thursday.approachRodado && progress.thursday.puttEscalera;
+            case 'thursday': return progress.thursday.freePlay && progress.thursday.approachSuccess > 0 && progress.thursday.stairsSuccess > 0;
             default: return false;
         }
     };
@@ -305,15 +305,57 @@ export default function TrainingLog() {
                             <span style={{ fontWeight: 500 }}>Juego Libre</span>
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Ritmo</span>
                         </div>
-                        <div style={agendaLine}>
-                            <input type="checkbox" checked={progress.thursday.approachRodado} onChange={() => handleToggle('thursday', 'approachRodado')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Approach Rodado</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Target: 2m</span>
+
+                        {/* APPROACH COUNTER */}
+                        <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 500 }}>Approach Rodado</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Bolas en Radio 2m</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
+                                <button
+                                    onClick={() => handleInputChange('thursday', 'approachSuccess', Math.max(0, parseInt(progress.thursday.approachSuccess || 0) - 1))}
+                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                >
+                                    <Minus size={14} />
+                                </button>
+                                <div style={{ minWidth: '60px', textAlign: 'center' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary-dark)' }}>{progress.thursday.approachSuccess}</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / {progress.thursday.approachTotal}</span>
+                                </div>
+                                <button
+                                    onClick={() => handleInputChange('thursday', 'approachSuccess', Math.min(progress.thursday.approachTotal, parseInt(progress.thursday.approachSuccess || 0) + 1))}
+                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                >
+                                    <Plus size={14} />
+                                </button>
+                            </div>
                         </div>
-                        <div style={agendaLine}>
-                            <input type="checkbox" checked={progress.thursday.puttEscalera} onChange={() => handleToggle('thursday', 'puttEscalera')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Putt Escalera</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Control</span>
+
+                        {/* STAIRS COUNTER */}
+                        <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto', borderBottom: 'none' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: 500 }}>Putt Escalera</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Escaleras Completas</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
+                                <button
+                                    onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.max(0, parseInt(progress.thursday.stairsSuccess || 0) - 1))}
+                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                >
+                                    <Minus size={14} />
+                                </button>
+                                <div style={{ minWidth: '60px', textAlign: 'center' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary-dark)' }}>{progress.thursday.stairsSuccess}</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / {progress.thursday.stairsTotal}</span>
+                                </div>
+                                <button
+                                    onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.min(progress.thursday.stairsTotal, parseInt(progress.thursday.stairsSuccess || 0) + 1))}
+                                    style={{ background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                >
+                                    <Plus size={14} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </>
