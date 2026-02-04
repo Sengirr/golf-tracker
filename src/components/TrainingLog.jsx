@@ -42,12 +42,28 @@ export default function TrainingLog() {
         localStorage.setItem(`training_agenda_${currentWeekId}`, JSON.stringify(progress));
     }, [progress, currentWeekId]);
 
+    // Helper to get week date range (e.g., "3 Feb - 9 Feb")
+    const getWeekRange = (weekId) => {
+        const [year, weekStr] = weekId.split('-W');
+        const week = parseInt(weekStr);
+        let d = new Date(parseInt(year), 0, 1);
+        const dayOffset = (d.getDay() || 7) - 1;
+        d.setDate(d.getDate() - dayOffset + (week - 1) * 7);
+
+        const start = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        const endDate = new Date(d);
+        endDate.setDate(d.getDate() + 6);
+        const end = endDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+
+        return `${start} - ${end}`;
+    };
+
     const changeWeek = (offset) => {
         const [year, weekStr] = currentWeekId.split('-W');
         const week = parseInt(weekStr);
         let d = new Date(parseInt(year), 0, 1);
-        // Approximation for jumping weeks
-        d.setDate(d.getDate() + (week - 1) * 7 + (offset * 7) + 3);
+        const dayOffset = (d.getDay() || 7) - 1;
+        d.setDate(d.getDate() - dayOffset + (week - 1) * 7 + (offset * 7) + 3);
         setCurrentWeekId(getWeekId(d));
     };
 
@@ -77,132 +93,138 @@ export default function TrainingLog() {
 
     const dayStyle = {
         background: 'white',
-        borderRadius: '16px',
-        padding: '1.5rem',
-        marginBottom: '1.5rem',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-        borderLeft: '4px solid var(--primary)',
-        position: 'relative',
-        overflow: 'hidden'
+        borderRadius: '20px',
+        padding: '1.25rem',
+        marginBottom: '1.25rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        borderLeft: '5px solid var(--primary)',
+        position: 'relative'
     };
 
     const agendaLine = {
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: '30px 1fr auto',
         alignItems: 'center',
-        gap: '1rem',
-        padding: '0.75rem 0',
-        borderBottom: '1px solid #f0f0f0'
+        gap: '0.75rem',
+        padding: '0.85rem 0',
+        borderBottom: '1px solid #f5f5f5'
     };
 
     return (
-        <div className="fade-in" style={{ paddingBottom: '100px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="fade-in" style={{ paddingBottom: '120px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                    <h1>Agenda de Entreno</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Tu hoja de ruta semanal para bajar el hándicap.</p>
+                    <h1>Agenda Semanal</h1>
+                    <p style={{ color: 'var(--text-muted)', margin: 0 }}>Tu hoja de ruta para bajar el hándicap.</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'white', padding: '0.5rem 1rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                    <button onClick={() => changeWeek(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.25rem' }}><ChevronLeft size={20} /></button>
-                    <div style={{ textAlign: 'center', minWidth: '100px' }}>
-                        <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', fontWeight: 700, textTransform: 'uppercase' }}>Semana</span>
-                        <span style={{ fontWeight: 800, fontSize: '1rem' }}>{currentWeekId.replace('-W', ' / ')}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'white', padding: '0.6rem 1.25rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                    <button onClick={() => changeWeek(-1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronLeft size={18} /></button>
+                    <div style={{ textAlign: 'center', minWidth: '120px' }}>
+                        <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Semana {currentWeekId.split('-W')[1]}</span>
+                        <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--primary-dark)' }}>{getWeekRange(currentWeekId)}</span>
                     </div>
-                    <button onClick={() => changeWeek(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.25rem' }}><ChevronRight size={20} /></button>
+                    <button onClick={() => changeWeek(1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronRight size={18} /></button>
                 </div>
             </div>
 
             {/* MONDAY */}
             <div style={dayStyle}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0, color: 'var(--primary)' }}>Lunes - Calibración & Putt</h3>
-                    {isDayComplete('monday') && <span style={{ color: '#386641', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Award size={16} /> ¡LOGRADO!</span>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.1rem' }}>Lunes - Calibración & Putt</h3>
+                    {isDayComplete('monday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
                 </div>
                 <div style={agendaLine}>
-                    <input type="checkbox" checked={progress.monday.calib54} onChange={() => handleToggle('monday', 'calib54')} />
-                    <span>Calibración 54º</span>
+                    <input type="checkbox" checked={progress.monday.calib54} onChange={() => handleToggle('monday', 'calib54')} style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: 500 }}>Calibración 54º</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Target: 1m</span>
                 </div>
                 <div style={agendaLine}>
-                    <input type="checkbox" checked={progress.monday.puttCircuit} onChange={() => handleToggle('monday', 'puttCircuit')} />
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>Circuito Putt</span>
-                        <input
-                            type="text"
-                            placeholder="Puntos..."
-                            value={progress.monday.puttScore}
-                            onChange={(e) => handleInputChange('monday', 'puttScore', e.target.value)}
-                            style={{ width: '80px', padding: '0.25rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
-                        />
-                    </div>
+                    <input type="checkbox" checked={progress.monday.puttCircuit} onChange={() => handleToggle('monday', 'puttCircuit')} style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: 500 }}>Circuito Putt</span>
+                    <input
+                        type="text"
+                        placeholder="Pts..."
+                        value={progress.monday.puttScore}
+                        onChange={(e) => handleInputChange('monday', 'puttScore', e.target.value)}
+                        style={{ width: '70px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                    />
                 </div>
             </div>
 
             {/* TUESDAY */}
             <div style={{ ...dayStyle, borderLeftColor: '#6a994e' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0, color: '#6a994e' }}>Martes - Técnica & Clase</h3>
-                    {isDayComplete('tuesday') && <span style={{ color: '#386641', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Award size={16} /> ¡LOGRADO!</span>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, color: '#6a994e', fontSize: '1.1rem' }}>Martes - Técnica & Clase</h3>
+                    {isDayComplete('tuesday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
                 </div>
                 <div style={agendaLine}>
-                    <input type="checkbox" checked={progress.tuesday.proClass} onChange={() => handleToggle('tuesday', 'proClass')} />
-                    <span>Clase con el Pro</span>
+                    <input type="checkbox" checked={progress.tuesday.proClass} onChange={() => handleToggle('tuesday', 'proClass')} style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: 500 }}>Clase con el Pro</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
                 </div>
                 <div style={agendaLine}>
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>Ejercicio Toalla</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <input
-                                type="number"
-                                placeholder="%"
-                                value={progress.tuesday.towelDrill}
-                                onChange={(e) => handleInputChange('tuesday', 'towelDrill', e.target.value)}
-                                style={{ width: '60px', padding: '0.25rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
-                            />
-                            <span style={{ fontSize: '0.8rem' }}>% acierto</span>
-                        </div>
+                    <div></div>
+                    <span style={{ fontWeight: 500 }}>Ejercicio Toalla</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <input
+                            type="number"
+                            placeholder="%"
+                            value={progress.tuesday.towelDrill}
+                            onChange={(e) => handleInputChange('tuesday', 'towelDrill', e.target.value)}
+                            style={{ width: '55px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                        />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>%</span>
                     </div>
                 </div>
             </div>
 
             {/* WEDNESDAY */}
             <div style={{ ...dayStyle, borderLeftColor: '#a7c957' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0, color: '#a7c957' }}>Miércoles - Campo & Regla</h3>
-                    {isDayComplete('wednesday') && <span style={{ color: '#386641', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Award size={16} /> ¡LOGRADO!</span>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, color: '#a7c957', fontSize: '1.1rem' }}>Miércoles - Campo & Regla</h3>
+                    {isDayComplete('wednesday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
                 </div>
                 <div style={agendaLine}>
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>9 Hoyos - Regla 60m</span>
-                        <input
-                            type="number"
-                            placeholder="Veces..."
-                            value={progress.wednesday.rule60m}
-                            onChange={(e) => handleInputChange('wednesday', 'rule60m', e.target.value)}
-                            style={{ width: '80px', padding: '0.25rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
-                        />
-                    </div>
+                    <div></div>
+                    <span style={{ fontWeight: 500 }}>9 Hoyos - Regla 60m</span>
+                    <input
+                        type="number"
+                        placeholder="Veces"
+                        value={progress.wednesday.rule60m}
+                        onChange={(e) => handleInputChange('wednesday', 'rule60m', e.target.value)}
+                        style={{ width: '75px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                    />
                 </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0.5rem 0 0' }}>💡 Indica cuántas veces respetaste la regla de no atacar a menos de 60m.</p>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Sparkles size={12} /> Veces respetada la regla de no atacar a menos de 60m.
+                </p>
             </div>
 
             {/* THURSDAY */}
             <div style={{ ...dayStyle, borderLeftColor: '#f2e8cf' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0, color: '#8b8b8b' }}>Jueves - Juego Corto</h3>
-                    {isDayComplete('thursday') && <span style={{ color: '#386641', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Award size={16} /> ¡LOGRADO!</span>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, color: '#8b8b8b', fontSize: '1.1rem' }}>Jueves - Juego Corto</h3>
+                    {isDayComplete('thursday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
                 </div>
                 <div style={agendaLine}>
-                    <input type="checkbox" checked={progress.thursday.freePlay} onChange={() => handleToggle('thursday', 'freePlay')} />
-                    <span>Juego Libre</span>
+                    <input type="checkbox" checked={progress.thursday.freePlay} onChange={() => handleToggle('thursday', 'freePlay')} style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: 500 }}>Juego Libre</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Ritmo</span>
                 </div>
                 <div style={agendaLine}>
-                    <input type="checkbox" checked={progress.thursday.approachRodado} onChange={() => handleToggle('thursday', 'approachRodado')} />
-                    <span>Approach Rodado</span>
+                    <input type="checkbox" checked={progress.thursday.approachRodado} onChange={() => handleToggle('thursday', 'approachRodado')} style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: 500 }}>Approach Rodado</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Target: 2m</span>
                 </div>
                 <div style={agendaLine}>
-                    <input type="checkbox" checked={progress.thursday.puttEscalera} onChange={() => handleToggle('thursday', 'puttEscalera')} />
-                    <span>Putt Escalera</span>
+                    <input type="checkbox" checked={progress.thursday.puttEscalera} onChange={() => handleToggle('thursday', 'puttEscalera')} style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: 500 }}>Putt Escalera</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Control</span>
                 </div>
             </div>
         </div>
+    );
+}
+        </div >
     );
 }
