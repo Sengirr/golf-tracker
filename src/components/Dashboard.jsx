@@ -7,7 +7,7 @@ export default function Dashboard({ setActiveTab }) {
         avgScore: 0,
         totalRounds: 0,
         trainingHours: 0,
-        upcomingTournaments: 0,
+        avgTriputts: 0,
         nextTournament: null
     });
     const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export default function Dashboard({ setActiveTab }) {
     async function fetchStats() {
         setLoading(true);
         try {
-            const { data: rounds } = await supabase.from('rounds').select('score');
+            const { data: rounds } = await supabase.from('rounds').select('score, triputts');
             const { data: training } = await supabase.from('trainings').select('duration_mins');
             const { data: tourns, count: tournCount } = await supabase.from('tournaments')
                 .select('*', { count: 'exact' })
@@ -35,7 +35,11 @@ export default function Dashboard({ setActiveTab }) {
 
             const avg = rounds?.length > 0
                 ? Math.round(rounds.reduce((acc, r) => acc + r.score, 0) / rounds.length)
-                : 0;
+                : 'N/A';
+
+            const avgTri = rounds?.length > 0
+                ? (rounds.reduce((acc, r) => acc + (r.triputts || 0), 0) / rounds.length).toFixed(1)
+                : '0';
 
             const hours = training?.length > 0
                 ? Math.round(training.reduce((acc, t) => acc + t.duration_mins, 0) / 60)
@@ -45,7 +49,7 @@ export default function Dashboard({ setActiveTab }) {
                 avgScore: avg,
                 totalRounds: rounds?.length || 0,
                 trainingHours: hours,
-                upcomingTournaments: tournCount || 0,
+                avgTriputts: avgTri,
                 nextTournament: tourns?.[0] || null
             });
         } catch (error) {
@@ -59,7 +63,6 @@ export default function Dashboard({ setActiveTab }) {
         { label: 'Puntuación Media', value: stats.avgScore || 'N/A', icon: Target, color: '#386641' },
         { label: 'Total Partidas', value: stats.totalRounds, icon: Trophy, color: '#6a994e' },
         { label: 'Horas de Entreno', value: stats.trainingHours, icon: Clock, color: '#a7c957' },
-        { label: 'Próximos Torneos', value: stats.upcomingTournaments, icon: Calendar, color: '#bc4749' }
     ];
 
     return (
@@ -86,6 +89,15 @@ export default function Dashboard({ setActiveTab }) {
                         </div>
                     </div>
                 ))}
+                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{ padding: '1rem', borderRadius: '12px', backgroundColor: `#bc474915`, color: '#bc4749' }}>
+                        <Target size={24} />
+                    </div>
+                    <div>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-muted)' }}>Triputts Medios</p>
+                        <h2 style={{ margin: 0, fontSize: '1.5rem', color: stats.avgTriputts > 2 ? '#bc4749' : 'inherit' }}>{stats.avgTriputts}</h2>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))' }}>

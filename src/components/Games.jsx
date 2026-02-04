@@ -10,6 +10,7 @@ export default function Games() {
         course_name: '',
         score: '',
         holes_played: 18,
+        triputts: 0,
         date: new Date().toISOString().split('T')[0],
         notes: ''
     });
@@ -42,7 +43,7 @@ export default function Games() {
         if (error) alert('Error al guardar la partida');
         else {
             setShowForm(false);
-            setFormData({ course_name: '', score: '', holes_played: 18, date: new Date().toISOString().split('T')[0], notes: '' });
+            setFormData({ course_name: '', score: '', holes_played: 18, triputts: 0, date: new Date().toISOString().split('T')[0], notes: '' });
             fetchRounds();
         }
     }
@@ -102,6 +103,16 @@ export default function Games() {
                             </select>
                         </div>
                         <div className="input-group">
+                            <label>Triputts (3-putts)</label>
+                            <input
+                                type="number"
+                                required
+                                value={formData.triputts}
+                                onChange={e => setFormData({ ...formData, triputts: e.target.value })}
+                                placeholder="0"
+                            />
+                        </div>
+                        <div className="input-group">
                             <label>Fecha</label>
                             <input
                                 type="date"
@@ -141,9 +152,12 @@ export default function Games() {
                                 </div>
                                 <div>
                                     <h3 style={{ margin: 0 }}>{round.course_name}</h3>
-                                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {formatDate(round.date)}</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Hash size={14} /> {round.holes_played} hoyos</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
+                                            <strong>Triputts:</strong> {round.triputts || 0}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
