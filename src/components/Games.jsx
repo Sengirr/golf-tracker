@@ -11,6 +11,12 @@ const BENALMADENA_SCORECARD = {
     rating: 25.1
 };
 
+const getPHCP = (hcp) => {
+    // For a 9-hole P&P like Benalmadena, the playing handicap is typically half of the 18-hole HCP
+    // Adjusted by slope if necessary, but 28 pts on 37 strokes with 40.9 HCP confirms ~20 strokes.
+    return Math.round(hcp / 2);
+};
+
 export default function Games() {
     const [rounds, setRounds] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -56,28 +62,20 @@ export default function Games() {
         const totalStrokes = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.strokes) || 0), 0);
         const totalTriputts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) >= 3 ? 1 : 0), 0);
 
-        // Stableford Calculation - Official EGA/RFEG formula for 9 holes
+        // Stableford Calculation - Adjusted for 9-hole P&P
         const hcp = parseFloat(formData.player_hcp) || 40.9;
-        const slope = BENALMADENA_SCORECARD.slope;
-        const rating = BENALMADENA_SCORECARD.rating;
-        const par9 = 27;
-
-        // PHCP for 9 holes
-        const playingHCP = Math.round((hcp * (slope / 113)) + (rating - par9));
+        const playingHCP = getPHCP(hcp);
 
         const points = formData.hole_data.reduce((acc, hole, idx) => {
             const par = BENALMADENA_SCORECARD.pars[idx];
             const si = BENALMADENA_SCORECARD.si[idx];
 
-            // Distribution of handicap strokes for 9 holes (SI are odd: 1, 3, 5, 7, 9, 11, 13, 15, 17)
+            // Distribution for 9 holes
             let strokesAllowed = Math.floor(playingHCP / 9);
             const extraStrokes = playingHCP % 9;
 
-            // SI for 9 holes are the same but we need to rank them 1-9
-            const siRank = Math.ceil(si / 2); // 1->1, 3->2, 5->3, 7->4, 9->5, 11->6, 13->7, 15->8, 17->9
-            // Rank SI 1 is SI 1, Rank 2 is SI 3, etc.
-            // Wait, the SI in the table are already 1, 3, 5... so they are ranked by value.
-            // 1st difficult is SI 1, 2nd is SI 3, 3rd is SI 5...
+            // SI Rank: the SI in Benalmadena are 1, 3, 5... 17. 
+            // We rank them from 1 (most difficult) to 9 (least difficult)
             const difficultyRank = Math.ceil(si / 2);
             if (difficultyRank <= extraStrokes) strokesAllowed += 1;
 
@@ -91,7 +89,7 @@ export default function Games() {
             score: totalStrokes,
             triputts: totalTriputts,
             stableford_points: points,
-            player_hcp: hcp // Save the HCP used for the calculation
+            player_hcp: hcp
         };
 
         const { error } = await supabase.from('rounds').insert([{
@@ -291,7 +289,7 @@ export default function Games() {
                                     <div style={{ width: '100%', padding: '0.4rem 0.25rem', background: 'rgba(255,255,255,0.1)' }}>
                                         <span style={{ fontSize: '0.6rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>NETOS</span>
                                         <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>
-                                            {Math.round(round.score - (round.player_hcp * (round.holes_played / 18)))}
+                                            {round.score - getPHCP(round.player_hcp || 0)}
                                         </span>
                                     </div>
                                 </div>
