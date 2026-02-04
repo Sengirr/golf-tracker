@@ -21,6 +21,14 @@ const getPHCP = (hcp) => {
     return Math.round(phcp18 / 2); // 40.9 -> 10 strokes
 };
 
+const getHoleDifficultyRank = (si) => {
+    // In Benalmadena 9-hole P&P, SI values are odd numbers: 1, 3, 5, 7, 9, 11, 13, 15, 17
+    // RFEG Ranking for 9 holes: SI 17 is the 1st most difficult (rank 1), SI 1 is the 9th (rank 9).
+    // Mapping: 17->1, 15->2, 13->3, 11->4, 9->5, 7->6, 5->7, 3->8, 1->9
+    const siList = [17, 15, 13, 11, 9, 7, 5, 3, 1];
+    return siList.indexOf(si) + 1;
+};
+
 const calculateStableford = (holeData, playerHcp) => {
     if (!holeData || !Array.isArray(holeData)) return 0;
     const playingHCP = getPHCP(playerHcp);
@@ -31,7 +39,7 @@ const calculateStableford = (holeData, playerHcp) => {
 
         let strokesAllowed = Math.floor(playingHCP / 9);
         const extraStrokes = playingHCP % 9;
-        const difficultyRank = Math.ceil(si / 2);
+        const difficultyRank = getHoleDifficultyRank(si);
         if (difficultyRank <= extraStrokes) strokesAllowed += 1;
 
         const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
@@ -186,7 +194,7 @@ export default function Games() {
 
                                 let strokesAllowed = Math.floor(playingHCP / 9);
                                 const extraStrokes = playingHCP % 9;
-                                const difficultyRank = Math.ceil(si / 2);
+                                const difficultyRank = getHoleDifficultyRank(si);
                                 if (difficultyRank <= extraStrokes) strokesAllowed += 1;
 
                                 const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
