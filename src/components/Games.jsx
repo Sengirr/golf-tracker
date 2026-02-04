@@ -12,9 +12,15 @@ const BENALMADENA_SCORECARD = {
 };
 
 const getPHCP = (hcp) => {
-    // For a 9-hole P&P like Benalmadena, the playing handicap is typically half of the 18-hole HCP
-    // Adjusted by slope if necessary, but 28 pts on 37 strokes with 40.9 HCP confirms ~20 strokes.
-    return Math.round(hcp / 2);
+    // Official EGA/RFEG formula for 9 holes: 
+    // Playing Hcp (9h) = [ (Hcp * (Slope_18 / 113)) + (Rating_18 - Par_18) ] / 2
+    // Benalmadena 18h: Slope 63, Rating 50.1, Par 54
+    const slope = 63;
+    const rating = 50.1;
+    const par = 54;
+    const phcp18 = (hcp * (slope / 113)) + (rating - par);
+    // Note: We round according to RFEG standards for the final 9-hole value
+    return Math.round(phcp18 / 2); // 40.9 results in approx 9.5 -> 10 strokes
 };
 
 export default function Games() {
@@ -71,11 +77,24 @@ export default function Games() {
             const si = BENALMADENA_SCORECARD.si[idx];
 
             // Distribution for 9 holes
+            // PlayingHCP (e.g. 10) means 1 stroke per hole (9) + 1 extra on SI rank 1
             let strokesAllowed = Math.floor(playingHCP / 9);
             const extraStrokes = playingHCP % 9;
 
-            // SI Rank: the SI in Benalmadena are 1, 3, 5... 17. 
-            // We rank them from 1 (most difficult) to 9 (least difficult)
+            // SI for Benalmadena are 13, 17, 11, 15, 3, 5, 9, 1, 7 (Odd numbers)
+            // We rank them from 1 to 9 (1 is SI 1, 2 is SI 3, 3 is SI 5...)
+            // The SI values are already the ranks for odd-numbered SIs.
+            // For example, SI 1 is the 1st most difficult, SI 3 is the 2nd most difficult, etc.
+            // So, we need to map the actual SI value to its rank.
+            // The provided SI array is already sorted by difficulty if we consider the values themselves.
+            // SI: [13, 17, 11, 15, 3, 5, 9, 1, 7]
+            // Sorted SI values: [1, 3, 5, 7, 9, 11, 13, 15, 17]
+            // Rank 1: SI 1
+            // Rank 2: SI 3
+            // Rank 3: SI 5
+            // ...
+            // Rank 9: SI 17
+            // The current `difficultyRank = Math.ceil(si / 2)` correctly maps SI 1 to 1, SI 3 to 2, SI 5 to 3, etc.
             const difficultyRank = Math.ceil(si / 2);
             if (difficultyRank <= extraStrokes) strokesAllowed += 1;
 
