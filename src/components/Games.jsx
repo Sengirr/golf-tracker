@@ -6,7 +6,9 @@ const BENALMADENA_SCORECARD = {
     name: 'Benalmádena Golf',
     holes: 9,
     pars: [3, 3, 3, 3, 3, 3, 3, 3, 3],
-    si: [13, 17, 11, 15, 3, 5, 9, 1, 7]
+    si: [13, 17, 11, 15, 3, 5, 9, 1, 7],
+    slope: 63,
+    rating: 25.1
 };
 
 export default function Games() {
@@ -54,15 +56,30 @@ export default function Games() {
         const totalStrokes = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.strokes) || 0), 0);
         const totalTriputts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) >= 3 ? 1 : 0), 0);
 
-        // Stableford Calculation
+        // Stableford Calculation - Official EGA/RFEG formula for 9 holes
         const hcp = parseFloat(formData.player_hcp) || 40.9;
+        const slope = BENALMADENA_SCORECARD.slope;
+        const rating = BENALMADENA_SCORECARD.rating;
+        const par9 = 27;
+
+        // PHCP for 9 holes
+        const playingHCP = Math.round((hcp * (slope / 113)) + (rating - par9));
+
         const points = formData.hole_data.reduce((acc, hole, idx) => {
             const par = BENALMADENA_SCORECARD.pars[idx];
             const si = BENALMADENA_SCORECARD.si[idx];
 
-            // Distribution of strokes (Simplified for 18 SI)
-            let strokesAllowed = Math.floor(hcp / 9); // Benalmadena is 9 holes
-            if (hcp % 9 >= si) strokesAllowed += 1;
+            // Distribution of handicap strokes for 9 holes (SI are odd: 1, 3, 5, 7, 9, 11, 13, 15, 17)
+            let strokesAllowed = Math.floor(playingHCP / 9);
+            const extraStrokes = playingHCP % 9;
+
+            // SI for 9 holes are the same but we need to rank them 1-9
+            const siRank = Math.ceil(si / 2); // 1->1, 3->2, 5->3, 7->4, 9->5, 11->6, 13->7, 15->8, 17->9
+            // Rank SI 1 is SI 1, Rank 2 is SI 3, etc.
+            // Wait, the SI in the table are already 1, 3, 5... so they are ranked by value.
+            // 1st difficult is SI 1, 2nd is SI 3, 3rd is SI 5...
+            const difficultyRank = Math.ceil(si / 2);
+            if (difficultyRank <= extraStrokes) strokesAllowed += 1;
 
             const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
             const holePoints = Math.max(0, 2 + par - netScore);
@@ -73,7 +90,8 @@ export default function Games() {
             ...formData,
             score: totalStrokes,
             triputts: totalTriputts,
-            stableford_points: points
+            stableford_points: points,
+            player_hcp: hcp // Save the HCP used for the calculation
         };
 
         const { error } = await supabase.from('rounds').insert([{

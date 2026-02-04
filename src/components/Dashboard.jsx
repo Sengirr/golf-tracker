@@ -307,52 +307,52 @@ export default function Dashboard({ setActiveTab }) {
 
             {/* Strategy Chat Modal */}
             {showChat && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', z- index: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-            <div className="card" style={{ width: '100%', maxWidth: '500px', height: '80vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
-                <div style={{ padding: '1rem 1.5rem', background: 'var(--primary)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <Sparkles size={18} />
-                        <h3 style={{ margin: 0, color: 'white' }}>Caddie IA Estratega</h3>
-                    </div>
-                    <button onClick={() => setShowChat(false)} style={{ background: 'none', color: 'white', fontSize: '1.5rem' }}>&times;</button>
-                </div>
-
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {messages.map((m, i) => (
-                        <div key={i} style={{
-                            alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                            background: m.role === 'user' ? 'var(--primary)' : '#f0f0f0',
-                            color: m.role === 'user' ? 'white' : 'var(--text)',
-                            padding: '0.75rem 1rem',
-                            borderRadius: '12px',
-                            maxWidth: '85%',
-                            fontSize: '0.9rem',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
-                        }}>
-                            {m.text}
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div className="card" style={{ width: '100%', maxWidth: '500px', height: '80vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+                        <div style={{ padding: '1rem 1.5rem', background: 'var(--primary)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <Sparkles size={18} />
+                                <h3 style={{ margin: 0, color: 'white' }}>Caddie IA Estratega</h3>
+                            </div>
+                            <button onClick={() => setShowChat(false)} style={{ background: 'none', color: 'white', fontSize: '1.5rem' }}>&times;</button>
                         </div>
-                    ))}
-                </div>
 
-                <div style={{ padding: '1rem', borderTop: '1px solid #eee' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                        <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo juego en Benalmádena?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Estrategia Campo</button>
-                        <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo bajo mi hándicap?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Bajar HCP</button>
-                        <button className="btn-link" onClick={() => handleSendMessage(null, "Tengo problemas con el putt")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Consejo Putt</button>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {messages.map((m, i) => (
+                                <div key={i} style={{
+                                    alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
+                                    background: m.role === 'user' ? 'var(--primary)' : '#f0f0f0',
+                                    color: m.role === 'user' ? 'white' : 'var(--text)',
+                                    padding: '0.75rem 1rem',
+                                    borderRadius: '12px',
+                                    maxWidth: '85%',
+                                    fontSize: '0.9rem',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                                }}>
+                                    {m.text}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ padding: '1rem', borderTop: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                                <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo juego en Benalmádena?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Estrategia Campo</button>
+                                <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo bajo mi hándicap?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Bajar HCP</button>
+                                <button className="btn-link" onClick={() => handleSendMessage(null, "Tengo problemas con el putt")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Consejo Putt</button>
+                            </div>
+                            <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '0.5rem' }}>
+                                <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    placeholder="Escribe tu duda al caddie..."
+                                    style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #ddd' }}
+                                />
+                                <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1.25rem' }}>Enviar</button>
+                            </form>
+                        </div>
                     </div>
-                    <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '0.5rem' }}>
-                        <input
-                            type="text"
-                            value={chatInput}
-                            onChange={(e) => setChatInput(e.target.value)}
-                            placeholder="Escribe tu duda al caddie..."
-                            style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #ddd' }}
-                        />
-                        <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1.25rem' }}>Enviar</button>
-                    </form>
                 </div>
-            </div>
-        </div>
         </div >
     );
 }
