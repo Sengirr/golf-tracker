@@ -16,6 +16,7 @@ export default function TrainingLog() {
     const [currentWeekId, setCurrentWeekId] = useState(getWeekId(new Date()));
     const [progress, setProgress] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('week'); // 'week' or 'evolution'
     const [history, setHistory] = useState([]);
     const saveTimeout = useRef(null);
