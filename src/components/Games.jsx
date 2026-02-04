@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Trash2, Calendar, MapPin, Hash } from 'lucide-react';
+import { Plus, Trash2, Calendar, MapPin, Hash, Camera, Sparkles } from 'lucide-react';
 
 const BENALMADENA_SCORECARD = {
     name: 'Benalmádena Golf',
@@ -108,6 +108,18 @@ export default function Games() {
         }
     }
 
+    async function handleSimulateScan() {
+        const simulatedHoles = BENALMADENA_SCORECARD.pars.map((par, i) => ({
+            strokes: par + (Math.random() > 0.7 ? 1 : 0),
+            putts: Math.floor(Math.random() * 3) + 1,
+            fir: Math.random() > 0.4,
+            gir: Math.random() > 0.5
+        }));
+        setFormData({ ...formData, hole_data: simulatedHoles });
+        setEntryMode('detailed');
+        alert('IA Vision: Se han extraído los datos de la tarjeta con éxito.');
+    }
+
     async function deleteRound(id) {
         if (confirm('¿Estás seguro de que quieres eliminar esta partida?')) {
             const { error } = await supabase.from('rounds').delete().eq('id', id);
@@ -130,20 +142,31 @@ export default function Games() {
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '2rem' }}>
-                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button
+                                type="button"
+                                className={`btn-link ${entryMode === 'quick' ? 'active' : ''}`}
+                                onClick={() => setEntryMode('quick')}
+                                style={{ padding: '0.5rem 1rem', background: entryMode === 'quick' ? 'var(--primary)' : 'transparent', color: entryMode === 'quick' ? 'white' : 'var(--text)' }}
+                            >
+                                Rápido
+                            </button>
+                            <button
+                                type="button"
+                                className={`btn-link ${entryMode === 'detailed' ? 'active' : ''}`}
+                                onClick={() => setEntryMode('detailed')}
+                                style={{ padding: '0.5rem 1rem', background: entryMode === 'detailed' ? 'var(--primary)' : 'transparent', color: entryMode === 'detailed' ? 'white' : 'var(--text)' }}
+                            >
+                                Hoyo a Hoyo
+                            </button>
+                        </div>
                         <button
-                            className={`btn-link ${entryMode === 'quick' ? 'active' : ''}`}
-                            onClick={() => setEntryMode('quick')}
-                            style={{ padding: '0.5rem 1rem', background: entryMode === 'quick' ? 'var(--primary)' : 'transparent', color: entryMode === 'quick' ? 'white' : 'var(--text)' }}
+                            type="button"
+                            onClick={handleSimulateScan}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#e8f5e9', color: '#2e7d32', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #c8e6c9', fontWeight: 600, fontSize: '0.875rem' }}
                         >
-                            Rápido
-                        </button>
-                        <button
-                            className={`btn-link ${entryMode === 'detailed' ? 'active' : ''}`}
-                            onClick={() => setEntryMode('detailed')}
-                            style={{ padding: '0.5rem 1rem', background: entryMode === 'detailed' ? 'var(--primary)' : 'transparent', color: entryMode === 'detailed' ? 'white' : 'var(--text)' }}
-                        >
-                            Hoyo a Hoyo
+                            <Camera size={18} /> Simular Escaneo IA
                         </button>
                     </div>
 
