@@ -33,7 +33,7 @@ export default function Games() {
     async function handleSubmit(e) {
         e.preventDefault();
         const { error } = await supabase.from('rounds').insert([formData]);
-        if (error) alert('Error saving round');
+        if (error) alert('Error al guardar la partida');
         else {
             setShowForm(false);
             setFormData({ course_name: '', score: '', holes_played: 18, date: new Date().toISOString().split('T')[0], notes: '' });
@@ -42,9 +42,9 @@ export default function Games() {
     }
 
     async function deleteRound(id) {
-        if (confirm('Are you sure you want to delete this round?')) {
+        if (confirm('¿Estás seguro de que quieres eliminar esta partida?')) {
             const { error } = await supabase.from('rounds').delete().eq('id', id);
-            if (error) alert('Error deleting round');
+            if (error) alert('Error al eliminar la partida');
             else fetchRounds();
         }
     }
@@ -53,30 +53,30 @@ export default function Games() {
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
-                    <h1>Game History</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Track every stroke and every course.</p>
+                    <h1>Historial de Juego</h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Registra cada golpe y cada campo.</p>
                 </div>
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Plus size={20} /> {showForm ? 'Cancel' : 'Log Round'}
+                    <Plus size={20} /> {showForm ? 'Cancelar' : 'Registrar Partida'}
                 </button>
             </div>
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '2rem' }}>
-                    <h3>New Round Record</h3>
+                    <h3>Nueva Partida</h3>
                     <form onSubmit={handleSubmit} className="grid grid-cols-2">
                         <div className="input-group">
-                            <label>Course Name</label>
+                            <label>Nombre del Campo</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.course_name}
                                 onChange={e => setFormData({ ...formData, course_name: e.target.value })}
-                                placeholder="e.g. Pebble Beach"
+                                placeholder="ej. Pebble Beach"
                             />
                         </div>
                         <div className="input-group">
-                            <label>Score</label>
+                            <label>Puntuación (Golpes)</label>
                             <input
                                 type="number"
                                 required
@@ -86,17 +86,17 @@ export default function Games() {
                             />
                         </div>
                         <div className="input-group">
-                            <label>Holes Played</label>
+                            <label>Hoyos Jugados</label>
                             <select
                                 value={formData.holes_played}
                                 onChange={e => setFormData({ ...formData, holes_played: e.target.value })}
                             >
-                                <option value={18}>18 Holes</option>
-                                <option value={9}>9 Holes</option>
+                                <option value={18}>18 Hoyos</option>
+                                <option value={9}>9 Hoyos</option>
                             </select>
                         </div>
                         <div className="input-group">
-                            <label>Date</label>
+                            <label>Fecha</label>
                             <input
                                 type="date"
                                 required
@@ -105,39 +105,39 @@ export default function Games() {
                             />
                         </div>
                         <div className="input-group" style={{ gridColumn: 'span 2' }}>
-                            <label>Notes</label>
+                            <label>Notas</label>
                             <textarea
                                 rows="3"
                                 value={formData.notes}
                                 onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                                placeholder="How did you play?"
+                                placeholder="¿Cómo fue el juego?"
                             ></textarea>
                         </div>
-                        <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Save Round</button>
+                        <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Guardar Partida</button>
                     </form>
                 </div>
             )}
 
             <div className="grid">
                 {loading ? (
-                    <p>Loading your history...</p>
+                    <p>Cargando historial...</p>
                 ) : rounds.length === 0 ? (
                     <div className="card" style={{ textAlign: 'center', padding: '4rem' }}>
-                        <p style={{ color: 'var(--text-muted)' }}>No rounds recorded yet. Time to hit the course!</p>
+                        <p style={{ color: 'var(--text-muted)' }}>Aún no hay partidas registradas. ¡Es hora de salir al campo!</p>
                     </div>
                 ) : (
                     rounds.map(round => (
                         <div key={round.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                                 <div style={{ background: 'var(--primary)', color: 'white', width: '60px', height: '60px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>SCORE</span>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>GOLPES</span>
                                     <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>{round.score}</span>
                                 </div>
                                 <div>
                                     <h3 style={{ margin: 0 }}>{round.course_name}</h3>
                                     <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {round.date}</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Hash size={14} /> {round.holes_played} holes</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Hash size={14} /> {round.holes_played} hoyos</span>
                                     </div>
                                 </div>
                             </div>

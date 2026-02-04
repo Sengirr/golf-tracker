@@ -46,21 +46,21 @@ export default function Dashboard({ setActiveTab }) {
     }
 
     const statCards = [
-        { label: 'Average Score', value: stats.avgScore || 'N/A', icon: Target, color: '#386641' },
-        { label: 'Total Rounds', value: stats.totalRounds, icon: Trophy, color: '#6a994e' },
-        { label: 'Training Hours', value: stats.trainingHours, icon: Clock, color: '#a7c957' },
-        { label: 'Upcoming', value: stats.upcomingTournaments, icon: Calendar, color: '#bc4749' }
+        { label: 'Puntuación Media', value: stats.avgScore || 'N/A', icon: Target, color: '#386641' },
+        { label: 'Total Partidas', value: stats.totalRounds, icon: Trophy, color: '#6a994e' },
+        { label: 'Horas de Entreno', value: stats.trainingHours, icon: Clock, color: '#a7c957' },
+        { label: 'Próximos Torneos', value: stats.upcomingTournaments, icon: Calendar, color: '#bc4749' }
     ];
 
     return (
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
-                    <h1>Welcome back, Golfer</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Here's your performance overview.</p>
+                    <h1>Bienvenido de nuevo</h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Aquí tienes un resumen de tu rendimiento.</p>
                 </div>
                 <button className="btn-primary" onClick={() => setActiveTab('games')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Plus size={20} /> New Round
+                    <Plus size={20} /> Nueva Partida
                 </button>
             </div>
 
@@ -82,23 +82,23 @@ export default function Dashboard({ setActiveTab }) {
                 <div className="card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
                         <BarChart3 size={20} color="var(--primary)" />
-                        <h3 style={{ margin: 0 }}>Recent Activity</h3>
+                        <h3 style={{ margin: 0 }}>Actividad Reciente</h3>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
-                            Logged rounds and training sessions will appear here.
+                            Tus partidas y entrenamientos aparecerán aquí.
                         </p>
                     </div>
                 </div>
 
                 <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', color: 'white' }}>
-                    <h3 style={{ color: 'white' }}>Golf Mastery Tip</h3>
+                    <h3 style={{ color: 'white' }}>Consejo Pro</h3>
                     <p style={{ opacity: 0.9, marginBottom: '1.5rem' }}>
-                        "Focus on your short game. 60% of your shots are made within 100 yards of the green."
+                        "Céntrate en el juego corto. El 60% de tus golpes se realizan a menos de 100 yardas del green."
                     </p>
                     <div style={{ background: 'rgba(255,255,255,0.1)', padding: '1rem', borderRadius: '12px' }}>
-                        <p style={{ fontSize: '0.875rem', fontWeight: 500 }}>Next Tournament</p>
-                        <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{stats.upcomingTournaments > 0 ? 'View Schedule' : 'No tournaments scheduled'}</p>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 500 }}>Próximo Torneo</p>
+                        <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{stats.upcomingTournaments > 0 ? 'Ver calendario' : 'No hay torneos programados'}</p>
                     </div>
                 </div>
             </div>

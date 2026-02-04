@@ -32,18 +32,18 @@ export default function Training() {
     async function handleSubmit(e) {
         e.preventDefault();
         const { error } = await supabase.from('trainings').insert([formData]);
-        if (error) alert('Error saving session');
+        if (error) alert('Error al guardar la sesión');
         else {
             setShowForm(false);
-            setFormData({ training_type: 'Driving Range', duration_mins: '', focus: '', date: new Date().toISOString().split('T')[0] });
+            setFormData({ training_type: 'Campo de Prácticas', duration_mins: '', focus: '', date: new Date().toISOString().split('T')[0] });
             fetchSessions();
         }
     }
 
     async function deleteSession(id) {
-        if (confirm('Are you sure you want to delete this session?')) {
+        if (confirm('¿Estás seguro de que quieres eliminar esta sesión?')) {
             const { error } = await supabase.from('trainings').delete().eq('id', id);
-            if (error) alert('Error deleting session');
+            if (error) alert('Error al eliminar la sesión');
             else fetchSessions();
         }
     }
@@ -52,33 +52,33 @@ export default function Training() {
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
-                    <h1>Training Logs</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Master the game through consistent practice.</p>
+                    <h1>Registros de Entrenamiento</h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Domina el juego mediante la práctica constante.</p>
                 </div>
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Plus size={20} /> {showForm ? 'Cancel' : 'Record Session'}
+                    <Plus size={20} /> {showForm ? 'Cancelar' : 'Registrar Sesión'}
                 </button>
             </div>
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '2rem' }}>
-                    <h3>Log New Session</h3>
+                    <h3>Nueva Sesión de Práctica</h3>
                     <form onSubmit={handleSubmit} className="grid grid-cols-2">
                         <div className="input-group">
-                            <label>Activity Type</label>
+                            <label>Tipo de Actividad</label>
                             <select
                                 value={formData.training_type}
                                 onChange={e => setFormData({ ...formData, training_type: e.target.value })}
                             >
-                                <option value="Driving Range">Driving Range</option>
+                                <option value="Driving Range">Campo de Prácticas</option>
                                 <option value="Putting Green">Putting Green</option>
-                                <option value="Chipping Arena">Chipping Arena</option>
-                                <option value="Bunker Practice">Bunker Practice</option>
-                                <option value="Full Round Practice">Full Round Practice</option>
+                                <option value="Chipping Arena">Zona de Approach</option>
+                                <option value="Bunker Practice">Práctica de Bunker</option>
+                                <option value="Full Round Practice">Vuelta de Práctica</option>
                             </select>
                         </div>
                         <div className="input-group">
-                            <label>Duration (Minutes)</label>
+                            <label>Duración (Minutos)</label>
                             <input
                                 type="number"
                                 required
@@ -88,7 +88,7 @@ export default function Training() {
                             />
                         </div>
                         <div className="input-group">
-                            <label>Date</label>
+                            <label>Fecha</label>
                             <input
                                 type="date"
                                 required
@@ -97,25 +97,25 @@ export default function Training() {
                             />
                         </div>
                         <div className="input-group">
-                            <label>Focus / Goals</label>
+                            <label>Objetivo / Enfoque</label>
                             <input
                                 type="text"
                                 value={formData.focus}
                                 onChange={e => setFormData({ ...formData, focus: e.target.value })}
-                                placeholder="e.g. Iron consistency, Short game"
+                                placeholder="ej. Consistencia con hierros, Juego corto"
                             />
                         </div>
-                        <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Save Session</button>
+                        <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Guardar Sesión</button>
                     </form>
                 </div>
             )}
 
             <div className="grid">
                 {loading ? (
-                    <p>Loading your sessions...</p>
+                    <p>Cargando sesiones...</p>
                 ) : sessions.length === 0 ? (
                     <div className="card" style={{ textAlign: 'center', padding: '4rem' }}>
-                        <p style={{ color: 'var(--text-muted)' }}>No training sessions recorded. Practice brings results!</p>
+                        <p style={{ color: 'var(--text-muted)' }}>No hay sesiones registradas. ¡La práctica hace al maestro!</p>
                     </div>
                 ) : (
                     sessions.map(session => (
@@ -127,8 +127,8 @@ export default function Training() {
                                 <div>
                                     <h3 style={{ margin: 0 }}>{session.training_type}</h3>
                                     <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {session.duration_mins} mins</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Target size={14} /> {session.focus || 'General practice'}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {session.duration_mins} min</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Target size={14} /> {session.focus || 'Práctica general'}</span>
                                     </div>
                                 </div>
                             </div>

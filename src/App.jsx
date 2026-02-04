@@ -10,10 +10,10 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'games', label: 'Games', icon: Trophy },
-    { id: 'training', label: 'Training', icon: Dumbbell },
-    { id: 'tournaments', label: 'Tournaments', icon: CalendarIcon }
+    { id: 'dashboard', label: 'Panel', icon: LayoutDashboard },
+    { id: 'games', label: 'Partidas', icon: Trophy },
+    { id: 'training', label: 'Entrenos', icon: Dumbbell },
+    { id: 'tournaments', label: 'Torneos', icon: CalendarIcon }
   ];
 
   const renderContent = () => {
@@ -57,7 +57,7 @@ function App() {
       </main>
 
       <footer style={{ marginTop: '4rem', padding: '2rem', textAlign: 'center', borderTop: '1px solid #e0e0e0', color: 'var(--text-muted)' }}>
-        <p>© 2026 GolfTracker Premium. Swing with confidence.</p>
+        <p>© 2026 GolfTracker Premium. Juega con confianza.</p>
       </footer>
     </div>
   );

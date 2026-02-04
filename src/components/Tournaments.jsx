@@ -32,26 +32,26 @@ export default function Tournaments() {
     async function handleSubmit(e) {
         e.preventDefault();
         const { error } = await supabase.from('tournaments').insert([formData]);
-        if (error) alert('Error saving tournament');
+        if (error) alert('Error al guardar el torneo');
         else {
             setShowForm(false);
-            setFormData({ name: '', course: '', date: new Date().toISOString().split('T')[0], status: 'Interested' });
+            setFormData({ name: '', course: '', date: new Date().toISOString().split('T')[0], status: 'Interesado' });
             fetchTournaments();
         }
     }
 
     async function deleteTournament(id) {
-        if (confirm('Are you sure you want to delete this tournament?')) {
+        if (confirm('¿Estás seguro de que quieres eliminar este torneo?')) {
             const { error } = await supabase.from('tournaments').delete().eq('id', id);
-            if (error) alert('Error deleting tournament');
+            if (error) alert('Error al eliminar el torneo');
             else fetchTournaments();
         }
     }
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case 'Registered': return { background: '#d8f3dc', color: '#1b4332' };
-            case 'Completed': return { background: '#e9ecef', color: '#6c757d' };
+            case 'Inscrito': return { background: '#d8f3dc', color: '#1b4332' };
+            case 'Completado': return { background: '#e9ecef', color: '#6c757d' };
             default: return { background: '#fff3b0', color: '#856404' };
         }
     };
@@ -60,40 +60,40 @@ export default function Tournaments() {
         <div className="fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div>
-                    <h1>Tournament Schedule</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Plan your competitive season.</p>
+                    <h1>Calendario de Torneos</h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Planifica tu temporada competitiva.</p>
                 </div>
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Plus size={20} /> {showForm ? 'Cancel' : 'Add Tournament'}
+                    <Plus size={20} /> {showForm ? 'Cancelar' : 'Añadir Torneo'}
                 </button>
             </div>
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '2rem' }}>
-                    <h3>Add New Tournament</h3>
+                    <h3>Añadir Nuevo Torneo</h3>
                     <form onSubmit={handleSubmit} className="grid grid-cols-2">
                         <div className="input-group">
-                            <label>Tournament Name</label>
+                            <label>Nombre del Torneo</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="e.g. Amateur Open"
+                                placeholder="ej. Campeonato Amateur"
                             />
                         </div>
                         <div className="input-group">
-                            <label>Course</label>
+                            <label>Campo</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.course}
                                 onChange={e => setFormData({ ...formData, course: e.target.value })}
-                                placeholder="e.g. St Andrews"
+                                placeholder="ej. Valderrama"
                             />
                         </div>
                         <div className="input-group">
-                            <label>Date</label>
+                            <label>Fecha</label>
                             <input
                                 type="date"
                                 required
@@ -102,27 +102,27 @@ export default function Tournaments() {
                             />
                         </div>
                         <div className="input-group">
-                            <label>Status</label>
+                            <label>Estado</label>
                             <select
                                 value={formData.status}
                                 onChange={e => setFormData({ ...formData, status: e.target.value })}
                             >
-                                <option value="Interested">Interested</option>
-                                <option value="Registered">Registered</option>
-                                <option value="Completed">Completed</option>
+                                <option value="Interesado">Interesado</option>
+                                <option value="Inscrito">Inscrito</option>
+                                <option value="Completado">Completado</option>
                             </select>
                         </div>
-                        <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Save Tournament</button>
+                        <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Guardar Torneo</button>
                     </form>
                 </div>
             )}
 
             <div className="grid">
                 {loading ? (
-                    <p>Loading schedule...</p>
+                    <p>Cargando calendario...</p>
                 ) : tournaments.length === 0 ? (
                     <div className="card" style={{ textAlign: 'center', padding: '4rem' }}>
-                        <p style={{ color: 'var(--text-muted)' }}>No tournaments scheduled. Dream big, play bigger!</p>
+                        <p style={{ color: 'var(--text-muted)' }}>No hay torneos programados. ¡Sueña en grande!</p>
                     </div>
                 ) : (
                     tournaments.map(tourney => (
