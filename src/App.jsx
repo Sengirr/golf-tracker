@@ -5,6 +5,7 @@ import Tournaments from './components/Tournaments';
 import TrainingLog from './components/TrainingLog';
 import Settings from './components/Settings';
 import BottomNav from './components/BottomNav';
+import { SubscriptionProvider } from './context/SubscriptionContext';
 import { supabase } from './lib/supabase';
 import { LayoutDashboard, Trophy, Calendar as CalendarIcon, Flag, BookOpen, Settings as SettingsIcon } from 'lucide-react';
 
@@ -46,8 +47,11 @@ function App() {
         </button>
       </nav>
 
+
       <main className="container" style={{ paddingTop: '1.5rem', marginBottom: '4rem' }}>
-        {renderContent()}
+        <SubscriptionProvider>
+          {renderContent()}
+        </SubscriptionProvider>
       </main>
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />

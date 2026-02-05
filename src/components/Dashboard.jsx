@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useSubscription } from '../context/SubscriptionContext';
+import Paywall from './Paywall';
 import { Trophy, Target, Calendar, Clock, Plus, BarChart3, MapPin, Sparkles, TrendingDown, MessageSquare, Camera, MousePointer2 } from 'lucide-react';
 import { calculateStableford, getPHCP } from '../lib/golfUtils';
 
 export default function Dashboard({ setActiveTab }) {
+    const { isPro } = useSubscription();
     const [stats, setStats] = useState({
         avgScore: 0,
         totalRounds: 0,
@@ -18,6 +21,7 @@ export default function Dashboard({ setActiveTab }) {
     const [showSettings, setShowSettings] = useState(false);
     const [loading, setLoading] = useState(true);
     const [showSettings, setShowSettings] = useState(false);
+    const [showPaywall, setShowPaywall] = useState(false);
     const [settings, setSettings] = useState({
         userName: 'Golfer',
         currentHcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
@@ -140,10 +144,15 @@ export default function Dashboard({ setActiveTab }) {
             const lowerText = text.toLowerCase();
             if (lowerText.includes('benalmadena') || lowerText.includes('campo')) {
                 response = "Benalmádena Pitch & Putt es muy técnico. La clave está en no pasarse de los greens, que son pequeños y rápidos. ¡Mejor corto que largo!";
-            } else if (lowerText.includes('putt') || lowerText.includes('green')) {
-                response = "Para evitar los triputts, visualiza una zona de 1 metro alrededor del hoyo. Tu objetivo en el primer putt es simplemente dejarla en esa zona.";
-            } else if (lowerText.includes('hcp') || lowerText.includes('hándicap')) {
-                response = "Con tu HCP de 40.9, tienes 2 golpes extra por hoyo. No arriesgues; el bogey es tu amigo para bajar el handicap.";
+            } else if (lowerText.includes('putt') || lowerText.includes('green') || lowerText.includes('hcp')) {
+                if (!isPro) {
+                    setShowChat(false);
+                    setShowPaywall(true);
+                    return;
+                }
+                response = lowerText.includes('hcp')
+                    ? "Con tu HCP de 40.9, tienes 2 golpes extra por hoyo. No arriesgues; el bogey es tu amigo para bajar el handicap."
+                    : "Para evitar los triputts, visualiza una zona de 1 metro alrededor del hoyo. Tu objetivo en el primer putt es simplemente dejarla en esa zona.";
             }
             setMessages([...newMessages, { role: 'caddie', text: response }]);
         }, 600);
@@ -374,7 +383,12 @@ export default function Dashboard({ setActiveTab }) {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+                </div>
+    )
+}
+
+{/* Paywall Modal */ }
+{ showPaywall && <Paywall onClose={() => setShowPaywall(false)} /> }
+        </div >
     );
 }
