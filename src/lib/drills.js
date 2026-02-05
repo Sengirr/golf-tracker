@@ -3,7 +3,9 @@ import { Target, Flag, MousePointer2, Box, Layers, Timer } from 'lucide-react';
 export const DRILL_CATEGORIES = [
     { id: 'putt', label: 'Putt', color: '#386641' },
     { id: 'chip', label: 'Chip & Pitch', color: '#a7c957' },
-    { id: 'range', label: 'Driving Range', color: '#6a994e' }
+    { id: 'range', label: 'Driving Range', color: '#6a994e' },
+    { id: 'field', label: 'Campo', color: '#bc4749' },
+    { id: 'class', label: 'Clase', color: '#390099' }
 ];
 
 export const DRILLS = [
@@ -42,7 +44,7 @@ export const DRILLS = [
         id: 'chip_landing',
         categoryId: 'chip',
         label: 'Control de Aterrizaje',
-        description: 'Bolar que aterrizan en zona (radio 1m).',
+        description: 'Bolas que aterrizan en zona (radio 1m).',
         inputs: [{ key: 'chipLanding', label: 'Aciertos / 20', max: 20 }],
         icon: Box
     },
@@ -79,11 +81,43 @@ export const DRILLS = [
         description: 'Intentar 10 draws y 10 fades.',
         inputs: [{ key: 'shapeSuccess', label: 'Conseguidos / 20', max: 20 }],
         icon: Layers
+    },
+
+    // FIELD
+    {
+        id: 'field_9holes',
+        categoryId: 'field',
+        label: '9 Hoyos',
+        description: 'Ronda de práctica o torneo.',
+        inputs: [{ key: 'fieldScore', label: 'Resultado Stableford', max: 50 }],
+        icon: Flag
+    },
+
+    // CLASS
+    {
+        id: 'class_pro',
+        categoryId: 'class',
+        label: 'Clase con Profesor',
+        description: 'Sesión técnica o revisión de swing.',
+        inputs: [{ key: 'proClass', label: 'Asistencia', type: 'checkbox' }],
+        icon: MousePointer2
     }
 ];
 
-export const getDefaultActiveDrills = () => ({
-    putt: ['putt_54_test', 'putt_ladder'],
-    chip: ['approach_2m'],
-    range: ['range_tempo']
+export const getAllDrills = (customDrills = []) => {
+    return [...DRILLS, ...customDrills];
+};
+
+export const getDrillById = (id, customDrills = []) => {
+    return [...DRILLS, ...customDrills].find(d => d.id === id);
+};
+
+export const getDefaultWeeklyRoutine = () => ({
+    monday: ['putt_54_test', 'putt_circuit'], // Default Monday
+    tuesday: ['class_pro', 'range_tempo'],
+    wednesday: [],
+    thursday: ['approach_2m', 'putt_ladder'],
+    friday: [],
+    saturday: ['field_9holes'],
+    sunday: []
 });
