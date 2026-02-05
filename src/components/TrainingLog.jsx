@@ -19,6 +19,7 @@ export default function TrainingLog() {
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('week'); // 'week' or 'evolution'
     const [history, setHistory] = useState([]);
+    const [settings, setSettings] = useState({ coachName: 'Ruben', hcpGoal: '40' });
     const saveTimeout = useRef(null);
 
     function getDefaultProgress() {
@@ -56,6 +57,13 @@ export default function TrainingLog() {
             }
         }
         loadData();
+        loadData();
+
+        // Load user settings
+        const savedSettings = localStorage.getItem('golf_user_settings');
+        if (savedSettings) {
+            setSettings(JSON.parse(savedSettings));
+        }
     }, [currentWeekId]);
 
     // Load historical data for evolution view
@@ -372,7 +380,7 @@ export default function TrainingLog() {
                         </div>
                         <div style={agendaLine}>
                             <input type="checkbox" checked={progress.tuesday.proClass} onChange={() => handleToggle('tuesday', 'proClass')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Clase con Ruben</span>
+                            <span style={{ fontWeight: 500 }}>Clase con {settings.coachName}</span>
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
                         </div>
                         <div style={agendaLine}>
@@ -504,7 +512,7 @@ export default function TrainingLog() {
                         <div style={{ paddingLeft: '38px', marginTop: '-0.2rem' }}>
                             <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <Sparkles size={12} color="#D4AF37" />
-                                <span>Llano, Subida, Bajada (27 bolas). **Meta Hcp 40: > 15 aciertos.**</span>
+                                <span>Llano, Subida, Bajada (27 bolas). **Meta Hcp {settings.hcpGoal}: > 15 aciertos.**</span>
                             </p>
                         </div>
                     </div>
