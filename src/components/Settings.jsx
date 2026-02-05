@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, User, RotateCcw } from 'lucide-react';
+import { Save, User, RotateCcw, CheckCircle2 } from 'lucide-react';
 
 export default function Settings() {
     const [settings, setSettings] = useState({
