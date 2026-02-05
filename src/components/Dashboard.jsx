@@ -19,8 +19,6 @@ export default function Dashboard({ setActiveTab }) {
     });
     const [loading, setLoading] = useState(true);
     const [showSettings, setShowSettings] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [showSettings, setShowSettings] = useState(false);
     const [showPaywall, setShowPaywall] = useState(false);
     const [settings, setSettings] = useState({
         userName: 'Golfer',
@@ -38,7 +36,6 @@ export default function Dashboard({ setActiveTab }) {
         const date = new Date(dateString);
         return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
-
 
     useEffect(() => {
         const saved = localStorage.getItem('golf_user_settings');
@@ -78,13 +75,11 @@ export default function Dashboard({ setActiveTab }) {
 
             const avgStable = rounds?.length > 0
                 ? Math.round(rounds.reduce((acc, r) => {
-                    // Recalculate to ensure accuracy. 
-                    // If stableford_points > 25 in 9 holes for a 40 HCP, it's likely a stale bug or 18h test.
                     let pts = r.hole_data
                         ? calculateStableford(r.hole_data, r.player_hcp || 40.9)
                         : (r.stableford_points || 0);
 
-                    if (pts > 25 && (!r.hole_data)) pts = 18; // Sanitize stale data to "par" average
+                    if (pts > 25 && (!r.hole_data)) pts = 18;
                     return acc + pts;
                 }, 0) / rounds.length)
                 : 0;
@@ -93,7 +88,6 @@ export default function Dashboard({ setActiveTab }) {
                 ? Math.round(training.reduce((acc, t) => acc + t.duration_mins, 0) / 60)
                 : 0;
 
-            // AI Logic - Analyzing trends
             let recommendation = "¡Sigue así! Estás cogiendo ritmo.";
             const avgScoreNum = rounds?.length > 0 ? (rounds.reduce((acc, r) => acc + r.score, 0) / rounds.length) : 0;
 
@@ -105,11 +99,10 @@ export default function Dashboard({ setActiveTab }) {
                 recommendation = "Necesito 3 partidas más para darte consejos técnicos precisos. ¡Sal al campo!";
             }
 
-            // HCP Prediction logic
             const currentHCP = settings.currentHcp;
-            const hcpGoal = (avgStable > 18) ? (currentHCP - (avgStable - 18) * 0.5).toFixed(1) : currentHCP;
+            const hcpGoalPredict = (avgStable > 18) ? (currentHCP - (avgStable - 18) * 0.5).toFixed(1) : currentHCP;
             const predictionText = avgStable > 18
-                ? `Si mantienes este nivel, tu HCP bajará a ${hcpGoal} en tu próxima competición.`
+                ? `Si mantienes este nivel, tu HCP bajará a ${hcpGoalPredict} en tu próxima competición.`
                 : "Mantén la constancia en el campo para empezar a bajar tu handicap.";
 
             setStats({
@@ -138,7 +131,6 @@ export default function Dashboard({ setActiveTab }) {
         setMessages(newMessages);
         setChatInput('');
 
-        // Simple AI logic
         setTimeout(() => {
             let response = "Interesante pregunta. Como tu caddie, te recomiendo enfocarte en mantener un ritmo suave y confiar en tu swing.";
             const lowerText = text.toLowerCase();
@@ -160,7 +152,6 @@ export default function Dashboard({ setActiveTab }) {
 
     const handleSaveSettings = (e) => {
         e.preventDefault();
-        // Update main settings object and localStorage to keep sync
         const newSettings = {
             ...JSON.parse(localStorage.getItem('golf_user_settings') || '{}'),
             hcpCurrent: settings.currentHcp,
@@ -168,7 +159,7 @@ export default function Dashboard({ setActiveTab }) {
         };
         localStorage.setItem('golf_user_settings', JSON.stringify(newSettings));
         setShowSettings(false);
-        fetchStats(); // Refresh prediction
+        fetchStats();
     };
 
     const statCards = [
@@ -205,7 +196,6 @@ export default function Dashboard({ setActiveTab }) {
             </div>
 
             <div className="grid grid-cols-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-                {/* AI Caddie Card */}
                 <div className="card" style={{ border: '2px solid var(--accent)', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
                         <Sparkles size={100} color="var(--accent)" />
@@ -229,7 +219,6 @@ export default function Dashboard({ setActiveTab }) {
                     </div>
                 </div>
 
-                {/* HCP Predictor Card */}
                 <div className="card" style={{ background: 'white' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -238,10 +227,7 @@ export default function Dashboard({ setActiveTab }) {
                             </div>
                             <h3 style={{ margin: 0 }}>Predictor de HCP</h3>
                         </div>
-                        <button
-                            onClick={() => setShowSettings(true)}
-                            style={{ background: 'none', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                        >
+                        <button onClick={() => setShowSettings(true)} style={{ background: 'none', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                             Editar Objetivos
                         </button>
                     </div>
@@ -263,7 +249,6 @@ export default function Dashboard({ setActiveTab }) {
                     </p>
                 </div>
 
-
                 <div className="card" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', color: 'white' }}>
                     <h3 style={{ color: 'white' }}>Próximo Torneo</h3>
                     {stats.nextTournament ? (
@@ -273,34 +258,21 @@ export default function Dashboard({ setActiveTab }) {
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={16} /> {stats.nextTournament.course}</span>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={16} /> {formatDate(stats.nextTournament.date)}</span>
                             </div>
-                            <button
-                                className="btn-primary"
-                                onClick={() => setActiveTab('tournaments')}
-                                style={{ marginTop: '1.5rem', background: 'white', color: 'var(--primary)', width: '100%' }}
-                            >
+                            <button className="btn-primary" onClick={() => setActiveTab('tournaments')} style={{ marginTop: '1.5rem', background: 'white', color: 'var(--primary)', width: '100%' }}>
                                 Ver todos
                             </button>
                         </div>
                     ) : (
                         <>
-                            <p style={{ opacity: 0.9, marginBottom: '1.5rem' }}>
-                                No tienes torneos programados próximamente. ¡Es hora de apuntarse a uno!
-                            </p>
-                            <button
-                                className="btn-primary"
-                                onClick={() => setActiveTab('tournaments')}
-                                style={{ background: 'white', color: 'var(--primary)', width: '100%' }}
-                            >
+                            <p style={{ opacity: 0.9, marginBottom: '1.5rem' }}>No tienes torneos programados próximamente. ¡Es hora de apuntarse a uno!</p>
+                            <button className="btn-primary" onClick={() => setActiveTab('tournaments')} style={{ background: 'white', color: 'var(--primary)', width: '100%' }}>
                                 Buscar Torneos
                             </button>
                         </>
                     )}
-                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
-                        <p style={{ fontSize: '0.875rem', opacity: 0.8 }}><strong>Consejo:</strong> El 60% de los golpes se realizan a menos de 100 yardas.</p>
-                    </div>
                 </div>
             </div>
-            {/* Settings Modal */}
+
             {showSettings && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
                     <div className="card" style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column' }}>
@@ -311,31 +283,18 @@ export default function Dashboard({ setActiveTab }) {
                         <form onSubmit={handleSaveSettings}>
                             <div className="input-group">
                                 <label>Hándicap Actual</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={settings.currentHcp}
-                                    onChange={(e) => setSettings({ ...settings, currentHcp: parseFloat(e.target.value) })}
-                                />
+                                <input type="number" step="0.1" value={settings.currentHcp} onChange={(e) => setSettings({ ...settings, currentHcp: parseFloat(e.target.value) })} />
                             </div>
                             <div className="input-group" style={{ marginTop: '1rem' }}>
                                 <label>Hándicap Objetivo</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={settings.targetHcp}
-                                    onChange={(e) => setSettings({ ...settings, targetHcp: parseFloat(e.target.value) })}
-                                />
+                                <input type="number" step="0.1" value={settings.targetHcp} onChange={(e) => setSettings({ ...settings, targetHcp: parseFloat(e.target.value) })} />
                             </div>
-                            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
-                                Guardar Cambios
-                            </button>
+                            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>Guardar Cambios</button>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Strategy Chat Modal */}
             {showChat && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
                     <div className="card" style={{ width: '100%', maxWidth: '500px', height: '80vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
@@ -346,24 +305,16 @@ export default function Dashboard({ setActiveTab }) {
                             </div>
                             <button onClick={() => setShowChat(false)} style={{ background: 'none', color: 'white', fontSize: '1.5rem' }}>&times;</button>
                         </div>
-
                         <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             {messages.map((m, i) => (
                                 <div key={i} style={{
                                     alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
                                     background: m.role === 'user' ? 'var(--primary)' : '#f0f0f0',
                                     color: m.role === 'user' ? 'white' : 'var(--text)',
-                                    padding: '0.75rem 1rem',
-                                    borderRadius: '12px',
-                                    maxWidth: '85%',
-                                    fontSize: '0.9rem',
-                                    boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
-                                }}>
-                                    {m.text}
-                                </div>
+                                    padding: '0.75rem 1rem', borderRadius: '12px', maxWidth: '85%', fontSize: '0.9rem', boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                                }}>{m.text}</div>
                             ))}
                         </div>
-
                         <div style={{ padding: '1rem', borderTop: '1px solid #eee' }}>
                             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
                                 <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo juego en Benalmádena?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Estrategia Campo</button>
@@ -371,24 +322,15 @@ export default function Dashboard({ setActiveTab }) {
                                 <button className="btn-link" onClick={() => handleSendMessage(null, "Tengo problemas con el putt")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Consejo Putt</button>
                             </div>
                             <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    placeholder="Escribe tu duda al caddie..."
-                                    style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #ddd' }}
-                                />
+                                <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Escribe tu duda al caddie..." style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid #ddd' }} />
                                 <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1.25rem' }}>Enviar</button>
                             </form>
                         </div>
                     </div>
                 </div>
-                </div>
-    )
-}
+            )}
 
-{/* Paywall Modal */ }
-{ showPaywall && <Paywall onClose={() => setShowPaywall(false)} /> }
-        </div >
+            {showPaywall && <Paywall onClose={() => setShowPaywall(false)} />}
+        </div>
     );
 }
