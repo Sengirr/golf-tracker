@@ -116,6 +116,47 @@ export default function Settings() {
                         Se usará pare definir los objetivos de aciertos (ej. >15 para HCP 40).
                     </p>
                 </div>
+
+                <div style={{ marginBottom: '1.5rem', borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+                    <label style={{ ...labelStyle, marginBottom: '1rem' }}>Días de Entrenamiento</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                        {[
+                            { key: 'monday', label: 'Lunes' },
+                            { key: 'tuesday', label: 'Martes' },
+                            { key: 'wednesday', label: 'Miércoles' },
+                            { key: 'thursday', label: 'Jueves' },
+                            { key: 'friday', label: 'Viernes' },
+                            { key: 'saturday', label: 'Sábado' },
+                            { key: 'sunday', label: 'Domingo' }
+                        ].map((day) => (
+                            <label key={day.key} style={{
+                                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                padding: '0.75rem', borderRadius: '12px',
+                                background: settings.trainingDays?.[day.key] ? 'var(--primary)' : '#f5f5f5',
+                                color: settings.trainingDays?.[day.key] ? 'white' : 'var(--text-muted)',
+                                cursor: 'pointer', transition: 'all 0.2s ease',
+                                fontWeight: 500
+                            }}>
+                                <input
+                                    type="checkbox"
+                                    checked={settings.trainingDays?.[day.key] || false}
+                                    onChange={(e) => {
+                                        setSettings(prev => ({
+                                            ...prev,
+                                            trainingDays: {
+                                                ...prev.trainingDays,
+                                                [day.key]: e.target.checked
+                                            }
+                                        }));
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                                {settings.trainingDays?.[day.key] ? <CheckCircle2 size={18} /> : <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #ddd' }} />}
+                                {day.label}
+                            </label>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <button
