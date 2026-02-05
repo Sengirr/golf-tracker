@@ -16,9 +16,12 @@ export default function Dashboard({ setActiveTab }) {
     });
     const [loading, setLoading] = useState(true);
     const [showSettings, setShowSettings] = useState(false);
-    const [hcpSettings, setHcpSettings] = useState({
-        current: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
-        target: parseFloat(localStorage.getItem('target_hcp')) || 36.0
+    const [loading, setLoading] = useState(true);
+    const [showSettings, setShowSettings] = useState(false);
+    const [settings, setSettings] = useState({
+        userName: 'Golfer',
+        currentHcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
+        targetHcp: parseFloat(localStorage.getItem('target_hcp')) || 36.0
     });
     const [showChat, setShowChat] = useState(false);
     const [chatInput, setChatInput] = useState('');
@@ -32,7 +35,18 @@ export default function Dashboard({ setActiveTab }) {
         return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
+
     useEffect(() => {
+        const saved = localStorage.getItem('golf_user_settings');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            setSettings(prev => ({
+                ...prev,
+                userName: parsed.userName || 'Golfer',
+                currentHcp: parseFloat(parsed.hcpCurrent) || prev.currentHcp,
+                targetHcp: parseFloat(parsed.hcpGoal) || prev.targetHcp
+            }));
+        }
         fetchStats();
     }, []);
 
@@ -88,7 +102,7 @@ export default function Dashboard({ setActiveTab }) {
             }
 
             // HCP Prediction logic
-            const currentHCP = hcpSettings.current;
+            const currentHCP = settings.currentHcp;
             const hcpGoal = (avgStable > 18) ? (currentHCP - (avgStable - 18) * 0.5).toFixed(1) : currentHCP;
             const predictionText = avgStable > 18
                 ? `Si mantienes este nivel, tu HCP bajará a ${hcpGoal} en tu próxima competición.`
@@ -137,8 +151,13 @@ export default function Dashboard({ setActiveTab }) {
 
     const handleSaveSettings = (e) => {
         e.preventDefault();
-        localStorage.setItem('current_hcp', hcpSettings.current);
-        localStorage.setItem('target_hcp', hcpSettings.target);
+        // Update main settings object and localStorage to keep sync
+        const newSettings = {
+            ...JSON.parse(localStorage.getItem('golf_user_settings') || '{}'),
+            hcpCurrent: settings.currentHcp,
+            hcpGoal: settings.targetHcp
+        };
+        localStorage.setItem('golf_user_settings', JSON.stringify(newSettings));
         setShowSettings(false);
         fetchStats(); // Refresh prediction
     };
@@ -152,7 +171,11 @@ export default function Dashboard({ setActiveTab }) {
 
     return (
         <div className="fade-in">
-            <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+            <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+                <div>
+                    <h1 style={{ margin: 0, fontSize: '1.8rem' }}>Hola, {settings.userName} 👋</h1>
+                    <p style={{ margin: 0, color: 'var(--text-muted)' }}>Vamos a mejorar ese juego hoy.</p>
+                </div>
                 <button className="btn-primary" onClick={() => setActiveTab('games')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                     <Plus size={20} /> Nueva Partida
                 </button>
@@ -216,14 +239,14 @@ export default function Dashboard({ setActiveTab }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1rem' }}>
                         <div style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>ACTUAL</p>
-                            <h2 style={{ margin: 0, color: 'var(--primary)' }}>{hcpSettings.current}</h2>
+                            <h2 style={{ margin: 0, color: 'var(--primary)' }}>{settings.currentHcp}</h2>
                         </div>
                         <div style={{ flex: 1, height: '4px', background: '#eee', borderRadius: '2px', position: 'relative' }}>
-                            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${Math.min(100, Math.max(0, (45 - hcpSettings.current) * 4))}%`, background: 'var(--accent)', borderRadius: '2px' }}></div>
+                            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${Math.min(100, Math.max(0, (45 - settings.currentHcp) * 4))}%`, background: 'var(--accent)', borderRadius: '2px' }}></div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>OBJETIVO</p>
-                            <h2 style={{ margin: 0, color: 'var(--accent)' }}>{hcpSettings.target}</h2>
+                            <h2 style={{ margin: 0, color: 'var(--accent)' }}>{settings.targetHcp}</h2>
                         </div>
                     </div>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
@@ -282,8 +305,8 @@ export default function Dashboard({ setActiveTab }) {
                                 <input
                                     type="number"
                                     step="0.1"
-                                    value={hcpSettings.current}
-                                    onChange={(e) => setHcpSettings({ ...hcpSettings, current: parseFloat(e.target.value) })}
+                                    value={settings.currentHcp}
+                                    onChange={(e) => setSettings({ ...settings, currentHcp: parseFloat(e.target.value) })}
                                 />
                             </div>
                             <div className="input-group" style={{ marginTop: '1rem' }}>
@@ -291,8 +314,8 @@ export default function Dashboard({ setActiveTab }) {
                                 <input
                                     type="number"
                                     step="0.1"
-                                    value={hcpSettings.target}
-                                    onChange={(e) => setHcpSettings({ ...hcpSettings, target: parseFloat(e.target.value) })}
+                                    value={settings.targetHcp}
+                                    onChange={(e) => setSettings({ ...settings, targetHcp: parseFloat(e.target.value) })}
                                 />
                             </div>
                             <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '2rem' }}>
