@@ -323,205 +323,214 @@ export default function TrainingLog() {
             ) : progress ? (
                 <>
                     {/* MONDAY */}
-                    <div style={dayStyle}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.1rem' }}>Lunes - Calibración & Putt</h3>
-                            {isDayComplete('monday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
-                        </div>
-                        <div style={{ marginBottom: '1rem', background: '#fcfcfc', padding: '1rem', borderRadius: '12px', border: '1px solid #eee' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                                <Target size={18} color="var(--primary)" />
-                                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Test de Precisión 54º</span>
+                    {settings.trainingDays?.monday !== false && (
+                        <div style={dayStyle}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.1rem' }}>Lunes - Calibración & Putt</h3>
+                                {isDayComplete('monday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                {[
-                                    { label: 'Corta Distancia (54º)', key: 'calibShort' },
-                                    { label: 'Media Distancia (54º)', key: 'calibMid' },
-                                    { label: 'Larga Distancia (P)', key: 'calibLong' }
-                                ].map((item) => (
-                                    <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '0.85rem', color: '#555' }}>{item.label}</span>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max="10"
-                                                value={progress.monday[item.key]}
-                                                onChange={(e) => handleInputChange('monday', item.key, e.target.value)}
-                                                style={{
-                                                    width: '50px',
-                                                    padding: '0.35rem',
-                                                    fontSize: '0.9rem',
-                                                    borderRadius: '8px',
-                                                    border: '2px solid',
-                                                    borderColor: getScoreColor(progress.monday[item.key]),
-                                                    textAlign: 'center',
-                                                    fontWeight: 700
-                                                }}
-                                            />
-                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>/ 10</span>
+                            <div style={{ marginBottom: '1rem', background: '#fcfcfc', padding: '1rem', borderRadius: '12px', border: '1px solid #eee' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                    <Target size={18} color="var(--primary)" />
+                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Test de Precisión 54º</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    {[
+                                        { label: 'Corta Distancia (54º)', key: 'calibShort' },
+                                        { label: 'Media Distancia (54º)', key: 'calibMid' },
+                                        { label: 'Larga Distancia (P)', key: 'calibLong' }
+                                    ].map((item) => (
+                                        <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.85rem', color: '#555' }}>{item.label}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="10"
+                                                    value={progress.monday[item.key]}
+                                                    onChange={(e) => handleInputChange('monday', item.key, e.target.value)}
+                                                    style={{
+                                                        width: '50px',
+                                                        padding: '0.35rem',
+                                                        fontSize: '0.9rem',
+                                                        borderRadius: '8px',
+                                                        border: '2px solid',
+                                                        borderColor: getScoreColor(progress.monday[item.key]),
+                                                        textAlign: 'center',
+                                                        fontWeight: 700
+                                                    }}
+                                                />
+                                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>/ 10</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                            </div>
+                            <div style={agendaLine}>
+                                <input type="checkbox" checked={progress.monday.puttCircuit} onChange={() => handleToggle('monday', 'puttCircuit')} style={{ width: '20px', height: '20px' }} />
+                                <span style={{ fontWeight: 500 }}>Circuito Putt</span>
+                                <input
+                                    type="text"
+                                    placeholder="Pts..."
+                                    value={progress.monday.puttScore}
+                                    onChange={(e) => handleInputChange('monday', 'puttScore', e.target.value)}
+                                    style={{ width: '70px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                                />
                             </div>
                         </div>
-                        <div style={agendaLine}>
-                            <input type="checkbox" checked={progress.monday.puttCircuit} onChange={() => handleToggle('monday', 'puttCircuit')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Circuito Putt</span>
-                            <input
-                                type="text"
-                                placeholder="Pts..."
-                                value={progress.monday.puttScore}
-                                onChange={(e) => handleInputChange('monday', 'puttScore', e.target.value)}
-                                style={{ width: '70px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
-                            />
-                        </div>
-                    </div>
+                    )}
 
                     {/* TUESDAY */}
-                    <div style={{ ...dayStyle, borderLeftColor: '#6a994e' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: '#6a994e', fontSize: '1.1rem' }}>Martes - Técnica & Clase</h3>
-                            {isDayComplete('tuesday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
-                        </div>
-                        <div style={agendaLine}>
-                            <input type="checkbox" checked={progress.tuesday.proClass} onChange={() => handleToggle('tuesday', 'proClass')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Clase con {settings.coachName}</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
-                        </div>
-                        <div style={agendaLine}>
-                            <div></div>
-                            <span style={{ fontWeight: 500 }}>Ejercicio Toalla</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <input
-                                    type="number"
-                                    placeholder="Fallos"
-                                    value={progress.tuesday.towelMisses}
-                                    onChange={(e) => handleInputChange('tuesday', 'towelMisses', e.target.value)}
-                                    style={{ width: '45px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
-                                />
-                                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/</span>
-                                <input
-                                    type="number"
-                                    placeholder="Total"
-                                    value={progress.tuesday.towelTotal}
-                                    onChange={(e) => handleInputChange('tuesday', 'towelTotal', e.target.value)}
-                                    style={{ width: '45px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
-                                />
-                                <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>fallos</span>
+                    {settings.trainingDays?.tuesday !== false && (
+                        <div style={{ ...dayStyle, borderLeftColor: '#6a994e' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <h3 style={{ margin: 0, color: '#6a994e', fontSize: '1.1rem' }}>Martes - Técnica & Clase</h3>
+                                {isDayComplete('tuesday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
+                            </div>
+                            <div style={agendaLine}>
+                                <input type="checkbox" checked={progress.tuesday.proClass} onChange={() => handleToggle('tuesday', 'proClass')} style={{ width: '20px', height: '20px' }} />
+                                <span style={{ fontWeight: 500 }}>Clase con {settings.coachName}</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
+                            </div>
+                            <div style={agendaLine}>
+                                <div></div>
+                                <span style={{ fontWeight: 500 }}>Ejercicio Toalla</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <input
+                                        type="number"
+                                        placeholder="Fallos"
+                                        value={progress.tuesday.towelMisses}
+                                        onChange={(e) => handleInputChange('tuesday', 'towelMisses', e.target.value)}
+                                        style={{ width: '45px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                                    />
+                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/</span>
+                                    <input
+                                        type="number"
+                                        placeholder="Total"
+                                        value={progress.tuesday.towelTotal}
+                                        onChange={(e) => handleInputChange('tuesday', 'towelTotal', e.target.value)}
+                                        style={{ width: '45px', padding: '0.35rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #eee', textAlign: 'center' }}
+                                    />
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>fallos</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
+
                     {/* WEDNESDAY */}
-                    <div style={{ ...dayStyle, borderLeftColor: '#a7c957' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: '#a7c957', fontSize: '1.1rem' }}>Miércoles - Campo</h3>
-                            {isDayComplete('wednesday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
+                    {settings.trainingDays?.wednesday !== false && (
+                        <div style={{ ...dayStyle, borderLeftColor: '#a7c957' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <h3 style={{ margin: 0, color: '#a7c957', fontSize: '1.1rem' }}>Miércoles - Campo</h3>
+                                {isDayComplete('wednesday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
+                            </div>
+                            <div style={agendaLine}>
+                                <input type="checkbox" checked={progress.wednesday.fieldDay} onChange={() => handleToggle('wednesday', 'fieldDay')} style={{ width: '20px', height: '20px' }} />
+                                <span style={{ fontWeight: 500 }}>Solo campo</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
+                            </div>
                         </div>
-                        <div style={agendaLine}>
-                            <input type="checkbox" checked={progress.wednesday.fieldDay} onChange={() => handleToggle('wednesday', 'fieldDay')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Solo campo</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mantenimiento</span>
-                        </div>
-                    </div>
+                    )}
 
                     {/* THURSDAY */}
-                    <div style={{ ...dayStyle, borderLeftColor: '#f2e8cf' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <h3 style={{ margin: 0, color: '#8b8b8b', fontSize: '1.1rem' }}>Jueves - Juego Corto</h3>
-                            {isDayComplete('thursday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
-                        </div>
-                        <div style={agendaLine}>
-                            <input type="checkbox" checked={progress.thursday.freePlay} onChange={() => handleToggle('thursday', 'freePlay')} style={{ width: '20px', height: '20px' }} />
-                            <span style={{ fontWeight: 500 }}>Juego Libre</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Ritmo</span>
-                        </div>
+                    {settings.trainingDays?.thursday !== false && (
+                        <div style={{ ...dayStyle, borderLeftColor: '#f2e8cf' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <h3 style={{ margin: 0, color: '#8b8b8b', fontSize: '1.1rem' }}>Jueves - Juego Corto</h3>
+                                {isDayComplete('thursday') && <span style={{ color: '#386641', fontSize: '0.7rem', fontWeight: 800, background: '#e8f5e9', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>LOGRADO</span>}
+                            </div>
+                            <div style={agendaLine}>
+                                <input type="checkbox" checked={progress.thursday.freePlay} onChange={() => handleToggle('thursday', 'freePlay')} style={{ width: '20px', height: '20px' }} />
+                                <span style={{ fontWeight: 500 }}>Juego Libre</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Ritmo</span>
+                            </div>
 
-                        {/* APPROACH COUNTER */}
-                        <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontWeight: 500 }}>Approach Rodado</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Bolas en Radio 2m (Total 30 bolas)</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
-                                <button
-                                    onClick={() => handleInputChange('thursday', 'approachSuccess', Math.max(0, parseInt(progress.thursday.approachSuccess || 0) - 1))}
-                                    disabled={parseInt(progress.thursday.approachSuccess || 0) <= 0}
-                                    style={{
-                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.approachSuccess || 0) <= 0) ? 'not-allowed' : 'pointer',
-                                        opacity: (parseInt(progress.thursday.approachSuccess || 0) <= 0) ? 0.5 : 1
-                                    }}
-                                >
-                                    <Minus size={14} />
-                                </button>
-                                <div style={{ minWidth: '85px', textAlign: 'center' }}>
-                                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary-dark)' }}>{progress.thursday.approachSuccess}</span>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / 30</span>
+                            {/* APPROACH COUNTER */}
+                            <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 500 }}>Approach Rodado</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Bolas en Radio 2m (Total 30 bolas)</span>
                                 </div>
-                                <button
-                                    onClick={() => handleInputChange('thursday', 'approachSuccess', Math.min(30, parseInt(progress.thursday.approachSuccess || 0) + 1))}
-                                    disabled={parseInt(progress.thursday.approachSuccess || 0) >= 30}
-                                    style={{
-                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.approachSuccess || 0) >= 30) ? 'not-allowed' : 'pointer',
-                                        opacity: (parseInt(progress.thursday.approachSuccess || 0) >= 30) ? 0.5 : 1
-                                    }}
-                                >
-                                    <Plus size={14} />
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
+                                    <button
+                                        onClick={() => handleInputChange('thursday', 'approachSuccess', Math.max(0, parseInt(progress.thursday.approachSuccess || 0) - 1))}
+                                        disabled={parseInt(progress.thursday.approachSuccess || 0) <= 0}
+                                        style={{
+                                            background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.approachSuccess || 0) <= 0) ? 'not-allowed' : 'pointer',
+                                            opacity: (parseInt(progress.thursday.approachSuccess || 0) <= 0) ? 0.5 : 1
+                                        }}
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <div style={{ minWidth: '85px', textAlign: 'center' }}>
+                                        <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary-dark)' }}>{progress.thursday.approachSuccess}</span>
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / 30</span>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInputChange('thursday', 'approachSuccess', Math.min(30, parseInt(progress.thursday.approachSuccess || 0) + 1))}
+                                        disabled={parseInt(progress.thursday.approachSuccess || 0) >= 30}
+                                        style={{
+                                            background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.approachSuccess || 0) >= 30) ? 'not-allowed' : 'pointer',
+                                            opacity: (parseInt(progress.thursday.approachSuccess || 0) >= 30) ? 0.5 : 1
+                                        }}
+                                    >
+                                        <Plus size={14} />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* STAIRS COUNTER */}
-                        <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto', borderBottom: 'none', paddingBottom: '0.5rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontWeight: 500 }}>Putt Escalera</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Aciertos Totales</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
-                                <button
-                                    onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.max(0, parseInt(progress.thursday.stairsSuccess || 0) - 1))}
-                                    disabled={parseInt(progress.thursday.stairsSuccess || 0) <= 0}
-                                    style={{
-                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.stairsSuccess || 0) <= 0) ? 'not-allowed' : 'pointer',
-                                        opacity: (parseInt(progress.thursday.stairsSuccess || 0) <= 0) ? 0.5 : 1
-                                    }}
-                                >
-                                    <Minus size={14} />
-                                </button>
-                                <div style={{ minWidth: '85px', textAlign: 'center' }}>
-                                    <span style={{
-                                        fontWeight: 800,
-                                        fontSize: '1.05rem',
-                                        color: parseInt(progress.thursday.stairsSuccess) > 20 ? '#D4AF37' : 'var(--primary-dark)',
-                                        textShadow: parseInt(progress.thursday.stairsSuccess) > 20 ? '0 0 10px rgba(212, 175, 55, 0.3)' : 'none'
-                                    }}>
-                                        {progress.thursday.stairsSuccess}
-                                    </span>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / 27</span>
+                            {/* STAIRS COUNTER */}
+                            <div style={{ ...agendaLine, gridTemplateColumns: '1fr auto', borderBottom: 'none', paddingBottom: '0.5rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 500 }}>Putt Escalera</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Aciertos Totales</span>
                                 </div>
-                                <button
-                                    onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.min(27, parseInt(progress.thursday.stairsSuccess || 0) + 1))}
-                                    disabled={parseInt(progress.thursday.stairsSuccess || 0) >= 27}
-                                    style={{
-                                        background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.stairsSuccess || 0) >= 27) ? 'not-allowed' : 'pointer',
-                                        opacity: (parseInt(progress.thursday.stairsSuccess || 0) >= 27) ? 0.5 : 1
-                                    }}
-                                >
-                                    <Plus size={14} />
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8f9fa', padding: '0.3rem', borderRadius: '12px' }}>
+                                    <button
+                                        onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.max(0, parseInt(progress.thursday.stairsSuccess || 0) - 1))}
+                                        disabled={parseInt(progress.thursday.stairsSuccess || 0) <= 0}
+                                        style={{
+                                            background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.stairsSuccess || 0) <= 0) ? 'not-allowed' : 'pointer',
+                                            opacity: (parseInt(progress.thursday.stairsSuccess || 0) <= 0) ? 0.5 : 1
+                                        }}
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <div style={{ minWidth: '85px', textAlign: 'center' }}>
+                                        <span style={{
+                                            fontWeight: 800,
+                                            fontSize: '1.05rem',
+                                            color: parseInt(progress.thursday.stairsSuccess) > 20 ? '#D4AF37' : 'var(--primary-dark)',
+                                            textShadow: parseInt(progress.thursday.stairsSuccess) > 20 ? '0 0 10px rgba(212, 175, 55, 0.3)' : 'none'
+                                        }}>
+                                            {progress.thursday.stairsSuccess}
+                                        </span>
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}> / 27</span>
+                                    </div>
+                                    <button
+                                        onClick={() => handleInputChange('thursday', 'stairsSuccess', Math.min(27, parseInt(progress.thursday.stairsSuccess || 0) + 1))}
+                                        disabled={parseInt(progress.thursday.stairsSuccess || 0) >= 27}
+                                        style={{
+                                            background: 'white', border: '1px solid #eee', borderRadius: '8px', width: '30px', height: '30px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (parseInt(progress.thursday.stairsSuccess || 0) >= 27) ? 'not-allowed' : 'pointer',
+                                            opacity: (parseInt(progress.thursday.stairsSuccess || 0) >= 27) ? 0.5 : 1
+                                        }}
+                                    >
+                                        <Plus size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div style={{ paddingLeft: '38px', marginTop: '-0.2rem' }}>
+                                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <Sparkles size={12} color="#D4AF37" />
+                                    <span>Llano, Subida, Bajada (27 bolas). **Meta Hcp {settings.hcpGoal}: > 15 aciertos.**</span>
+                                </p>
                             </div>
                         </div>
-                        <div style={{ paddingLeft: '38px', marginTop: '-0.2rem' }}>
-                            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <Sparkles size={12} color="#D4AF37" />
-                                <span>Llano, Subida, Bajada (27 bolas). **Meta Hcp {settings.hcpGoal}: > 15 aciertos.**</span>
-                            </p>
-                        </div>
-                    </div>
+                    )}
                 </>
             ) : null}
         </div>
