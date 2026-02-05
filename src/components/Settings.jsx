@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, User, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { DRILLS, DRILL_CATEGORIES, getDefaultActiveDrills } from '../lib/drills';
 
 export default function Settings() {
     const [settings, setSettings] = useState({
@@ -14,7 +15,8 @@ export default function Settings() {
             friday: false,
             saturday: false,
             sunday: false
-        }
+        },
+        activeDrills: getDefaultActiveDrills()
     });
 
     const [saving, setSaving] = useState(false);
@@ -156,6 +158,56 @@ export default function Settings() {
                             </label>
                         ))}
                     </div>
+                </div>
+
+                <div style={{ marginBottom: '1.5rem', borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+                    <label style={{ ...labelStyle, marginBottom: '1rem' }}>Rutina de Ejercicios</label>
+                    {DRILL_CATEGORIES.map(cat => (
+                        <div key={cat.id} style={{ marginBottom: '1.5rem' }}>
+                            <h4 style={{ margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: cat.color }}>
+                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: cat.color }}></span>
+                                {cat.label}
+                            </h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                                {DRILLS.filter(d => d.categoryId === cat.id).map(drill => (
+                                    <label key={drill.id} style={{
+                                        display: 'flex', alignItems: 'center', gap: '1rem',
+                                        padding: '0.75rem', borderRadius: '12px',
+                                        border: '1px solid #eee',
+                                        background: 'white',
+                                        cursor: 'pointer'
+                                    }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={settings.activeDrills?.[cat.id]?.includes(drill.id) || false}
+                                            onChange={(e) => {
+                                                const current = settings.activeDrills?.[cat.id] || [];
+                                                const newDrills = e.target.checked
+                                                    ? [...current, drill.id]
+                                                    : current.filter(id => id !== drill.id);
+
+                                                setSettings(prev => ({
+                                                    ...prev,
+                                                    activeDrills: {
+                                                        ...prev.activeDrills,
+                                                        [cat.id]: newDrills
+                                                    }
+                                                }));
+                                            }}
+                                            style={{
+                                                width: '18px', height: '18px', accentColor: 'var(--primary)',
+                                                cursor: 'pointer'
+                                            }}
+                                        />
+                                        <div>
+                                            <span style={{ fontWeight: 600, display: 'block', fontSize: '0.95rem' }}>{drill.label}</span>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{drill.description}</span>
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
