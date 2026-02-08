@@ -43,7 +43,9 @@ export default function Settings() {
                 setSettings(prev => ({
                     ...prev,
                     ...parsed,
-                    weeklyRoutine: parsed.weeklyRoutine || getDefaultWeeklyRoutine(),
+                    // Defensive coding: Ensure these objects are not null/undefined if parse failed or old data
+                    trainingDays: (parsed.trainingDays && typeof parsed.trainingDays === 'object') ? parsed.trainingDays : prev.trainingDays,
+                    weeklyRoutine: (parsed.weeklyRoutine && typeof parsed.weeklyRoutine === 'object') ? parsed.weeklyRoutine : getDefaultWeeklyRoutine(),
                     customDrills: Array.isArray(parsed.customDrills) ? parsed.customDrills : []
                 }));
             } catch (e) {

@@ -57,11 +57,12 @@ export default function TrainingLog() {
                 if (savedSettings) {
                     try {
                         const parsed = JSON.parse(savedSettings);
-                        // Safe merge
+                        // Safe merge with validation
                         currentSettings = {
                             ...settings,
                             ...parsed,
-                            weeklyRoutine: parsed.weeklyRoutine || getDefaultWeeklyRoutine(),
+                            trainingDays: (parsed.trainingDays && typeof parsed.trainingDays === 'object') ? parsed.trainingDays : settings.trainingDays,
+                            weeklyRoutine: (parsed.weeklyRoutine && typeof parsed.weeklyRoutine === 'object') ? parsed.weeklyRoutine : getDefaultWeeklyRoutine(),
                             customDrills: Array.isArray(parsed.customDrills) ? parsed.customDrills : []
                         };
                         setSettings(currentSettings);
