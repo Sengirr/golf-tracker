@@ -12,13 +12,13 @@ export const DRILLS = [
     // PUTT
     {
         id: 'putt_54_test',
-        categoryId: 'putt',
-        label: 'Test de Precisión 54º',
-        description: '3 distancias (Corta, Media, Larga). 10 bolas cada una.',
+        categoryId: 'range',
+        label: 'Control de Distancia (Wedges)',
+        description: '3 distancias con 54º y PW. 10 bolas cada una.',
         inputs: [
-            { key: 'calibShort', label: 'Corta (1m)', max: 10 },
-            { key: 'calibMid', label: 'Media (3m)', max: 10 },
-            { key: 'calibLong', label: 'Larga (6m)', max: 10 }
+            { key: 'calibShort', label: 'Corta (54º ½ Swing)', max: 10 },
+            { key: 'calibMid', label: 'Media (54º Full)', max: 10 },
+            { key: 'calibLong', label: 'Larga (PW Full)', max: 10 }
         ],
         icon: Target
     },
