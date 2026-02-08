@@ -105,11 +105,13 @@ export const DRILLS = [
 ];
 
 export const getAllDrills = (customDrills = []) => {
-    return [...DRILLS, ...customDrills];
+    const safeCustom = Array.isArray(customDrills) ? customDrills : [];
+    return [...DRILLS, ...safeCustom];
 };
 
 export const getDrillById = (id, customDrills = []) => {
-    return [...DRILLS, ...customDrills].find(d => d.id === id);
+    const safeCustom = Array.isArray(customDrills) ? customDrills : [];
+    return [...DRILLS, ...safeCustom].find(d => d.id === id);
 };
 
 export const getDefaultWeeklyRoutine = () => ({

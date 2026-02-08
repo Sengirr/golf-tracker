@@ -37,15 +37,19 @@ export default function Settings() {
     useEffect(() => {
         const saved = localStorage.getItem('golf_user_settings');
         if (saved) {
-            const parsed = JSON.parse(saved);
-            // Migration: Ensure weeklyRoutine exists
-            if (!parsed.weeklyRoutine) {
-                parsed.weeklyRoutine = getDefaultWeeklyRoutine();
+            try {
+                const parsed = JSON.parse(saved);
+                // Merge saved settings with defaults to ensure new keys (weeklyRoutine, customDrills) exist
+                setSettings(prev => ({
+                    ...prev,
+                    ...parsed,
+                    weeklyRoutine: parsed.weeklyRoutine || getDefaultWeeklyRoutine(),
+                    customDrills: Array.isArray(parsed.customDrills) ? parsed.customDrills : []
+                }));
+            } catch (e) {
+                console.error("Error parsing settings:", e);
+                // If error, keeping defaults is safer
             }
-            if (!parsed.customDrills) {
-                parsed.customDrills = [];
-            }
-            setSettings(parsed);
         }
     }, []);
 

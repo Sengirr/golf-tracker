@@ -53,12 +53,21 @@ export default function TrainingLog() {
                 // Load Settings First to get Custom Drills
                 const savedSettings = localStorage.getItem('golf_user_settings');
                 let currentSettings = settings;
+
                 if (savedSettings) {
-                    currentSettings = JSON.parse(savedSettings);
-                    // Migration
-                    if (!currentSettings.weeklyRoutine) currentSettings.weeklyRoutine = getDefaultWeeklyRoutine();
-                    if (!currentSettings.customDrills) currentSettings.customDrills = [];
-                    setSettings(currentSettings);
+                    try {
+                        const parsed = JSON.parse(savedSettings);
+                        // Safe merge
+                        currentSettings = {
+                            ...settings,
+                            ...parsed,
+                            weeklyRoutine: parsed.weeklyRoutine || getDefaultWeeklyRoutine(),
+                            customDrills: Array.isArray(parsed.customDrills) ? parsed.customDrills : []
+                        };
+                        setSettings(currentSettings);
+                    } catch (e) {
+                        console.error("Error parsing settings in Log:", e);
+                    }
                 }
 
                 // Load Agenda
