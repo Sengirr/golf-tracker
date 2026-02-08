@@ -105,12 +105,16 @@ export const DRILLS = [
 ];
 
 export const getAllDrills = (customDrills = []) => {
-    const safeCustom = Array.isArray(customDrills) ? customDrills : [];
+    const safeCustom = (Array.isArray(customDrills) ? customDrills : [])
+        .filter(d => d && typeof d === 'object')
+        .map(d => ({ ...d, icon: d.icon || Target }));
     return [...DRILLS, ...safeCustom];
 };
 
 export const getDrillById = (id, customDrills = []) => {
-    const safeCustom = Array.isArray(customDrills) ? customDrills : [];
+    const safeCustom = (Array.isArray(customDrills) ? customDrills : [])
+        .filter(d => d && typeof d === 'object')
+        .map(d => ({ ...d, icon: d.icon || Target }));
     return [...DRILLS, ...safeCustom].find(d => d.id === id);
 };
 
