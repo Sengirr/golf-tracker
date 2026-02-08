@@ -105,16 +105,17 @@ export const DRILLS = [
 ];
 
 export const getAllDrills = (customDrills = []) => {
+    // Force icon to be Target for all custom drills to prevent serialization crashes
     const safeCustom = (Array.isArray(customDrills) ? customDrills : [])
         .filter(d => d && typeof d === 'object')
-        .map(d => ({ ...d, icon: d.icon || Target }));
+        .map(d => ({ ...d, icon: Target }));
     return [...DRILLS, ...safeCustom];
 };
 
 export const getDrillById = (id, customDrills = []) => {
     const safeCustom = (Array.isArray(customDrills) ? customDrills : [])
         .filter(d => d && typeof d === 'object')
-        .map(d => ({ ...d, icon: d.icon || Target }));
+        .map(d => ({ ...d, icon: Target }));
     return [...DRILLS, ...safeCustom].find(d => d.id === id);
 };
 
