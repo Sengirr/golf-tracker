@@ -16,7 +16,7 @@ export default function Games() {
         player_hcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
         date: new Date().toISOString().split('T')[0],
         notes: '',
-        hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false })
+        hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false, lost_balls: 0 })
     });
 
     const formatDate = (dateString) => {
@@ -53,10 +53,15 @@ export default function Games() {
         const hcp = parseFloat(formData.player_hcp) || 40.9;
         const points = calculateStableford(formData.hole_data, hcp);
 
+        const totalLostBalls = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0);
+        const totalPutts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0);
+
         finalData = {
             ...formData,
             score: totalStrokes,
             triputts: totalTriputts,
+            total_putts: totalPutts,
+            total_lost_balls: totalLostBalls,
             stableford_points: points,
             player_hcp: hcp
         };
@@ -68,6 +73,8 @@ export default function Games() {
             triputts: parseInt(finalData.triputts),
             player_hcp: parseFloat(finalData.player_hcp),
             stableford_points: finalData.stableford_points || 0,
+            total_putts: finalData.total_putts || 0,
+            total_lost_balls: finalData.total_lost_balls || 0,
             hole_data: finalData.hole_data,
             date: finalData.date,
             notes: finalData.notes
@@ -84,7 +91,7 @@ export default function Games() {
                 player_hcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
                 date: new Date().toISOString().split('T')[0],
                 notes: '',
-                hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false })
+                hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false, lost_balls: 0 })
             });
             fetchRounds();
         }
@@ -95,7 +102,8 @@ export default function Games() {
             strokes: par + (Math.random() > 0.7 ? 1 : 0),
             putts: Math.floor(Math.random() * 3) + 1,
             fir: Math.random() > 0.4,
-            gir: Math.random() > 0.5
+            gir: Math.random() > 0.5,
+            lost_balls: Math.random() > 0.8 ? 1 : 0
         }));
         setFormData({ ...formData, hole_data: simulatedHoles });
         alert('IA Vision: Se han extraído los datos de la tarjeta con éxito.');
@@ -161,6 +169,9 @@ export default function Games() {
                                 <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>PAR(SI)</th>
                                 <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>BRU</th>
                                 <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>NET</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>P</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>GIR</th>
+                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>B</th>
                                 <th style={{ padding: '0.4rem', fontSize: '0.75rem', textAlign: 'right' }}>PTS</th>
                             </tr>
                         </thead>
@@ -192,6 +203,9 @@ export default function Games() {
                                                 <span key={i} style={{ color: 'var(--primary)', marginLeft: '2px', verticalAlign: 'top', fontSize: '1.2rem', lineHeight: '0' }}>.</span>
                                             ))}
                                         </td>
+                                        <td style={{ padding: '0.75rem 0.5rem' }}>{hole.putts}</td>
+                                        <td style={{ padding: '0.75rem 0.5rem' }}>{hole.gir ? '✓' : ''}</td>
+                                        <td style={{ padding: '0.75rem 0.5rem' }}>{hole.lost_balls || 0}</td>
                                         <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--primary)' }}>
                                             {holePoints}
                                         </td>
@@ -204,6 +218,9 @@ export default function Games() {
                                 <td colSpan="2" style={{ padding: '1rem 0.5rem' }}>TOTAL</td>
                                 <td style={{ padding: '1rem 0.5rem' }}>{round.score}</td>
                                 <td style={{ padding: '1rem 0.5rem' }}>{round.score - playingHCP}</td>
+                                <td style={{ padding: '1rem 0.5rem' }}>{round.total_putts || round.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0)}</td>
+                                <td style={{ padding: '1rem 0.5rem' }}>{round.hole_data.filter(h => h.gir).length}</td>
+                                <td style={{ padding: '1rem 0.5rem' }}>{round.total_lost_balls || round.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0)}</td>
                                 <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
                                     {calculateStableford(round.hole_data, round.player_hcp)}
                                 </td>
@@ -276,6 +293,7 @@ export default function Games() {
                                                 <th style={{ padding: '0.5rem' }}>Golpes</th>
                                                 <th style={{ padding: '0.5rem' }}>Putts</th>
                                                 <th style={{ padding: '0.5rem' }}>GIR</th>
+                                                <th style={{ padding: '0.5rem' }}>Bolas</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -315,6 +333,18 @@ export default function Games() {
                                                                 newData[idx] = { ...hole, gir: e.target.checked };
                                                                 setFormData({ ...formData, hole_data: newData });
                                                             }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="number"
+                                                            value={hole.lost_balls}
+                                                            onChange={e => {
+                                                                const newData = [...formData.hole_data];
+                                                                newData[idx] = { ...hole, lost_balls: e.target.value };
+                                                                setFormData({ ...formData, hole_data: newData });
+                                                            }}
+                                                            style={{ width: '60px', padding: '0.25rem' }}
                                                         />
                                                     </td>
                                                 </tr>
@@ -386,7 +416,13 @@ export default function Games() {
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {formatDate(round.date)}</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Hash size={14} /> {round.holes_played} hoyos</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
-                                            <strong>Triputts:</strong> {round.triputts || 0}
+                                            <strong>Putts:</strong> {round.total_putts || round.hole_data?.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0)}
+                                        </span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                            <strong>GIR:</strong> {round.hole_data?.filter(h => h.gir).length || 0}
+                                        </span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: (round.total_lost_balls || 0) > 0 ? '#bc4749' : 'inherit' }}>
+                                            <strong>Bolas:</strong> {round.total_lost_balls || 0}
                                         </span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#386641' }}>
                                             <strong>Stableford:</strong> {round.hole_data ? calculateStableford(round.hole_data, round.player_hcp) : round.stableford_points} pts
