@@ -17,6 +17,7 @@ export default function Dashboard({ setActiveTab }) {
         hcpPrediction: '',
         nextTournament: null
     });
+    const [roundsHistory, setRoundsHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showSettings, setShowSettings] = useState(false);
     const [showPaywall, setShowPaywall] = useState(false);
@@ -115,6 +116,12 @@ export default function Dashboard({ setActiveTab }) {
                 hcpPrediction: predictionText,
                 nextTournament: tourns?.[0] || null
             });
+
+            // Prepare Rounds History for Charts (Sorted by date)
+            if (rounds) {
+                const sortedRounds = [...rounds].sort((a, b) => new Date(a.date) - new Date(b.date));
+                setRoundsHistory(sortedRounds);
+            }
         } catch (error) {
             console.error('Error fetching stats:', error);
         } finally {
@@ -168,6 +175,54 @@ export default function Dashboard({ setActiveTab }) {
         { label: 'Total Partidas', value: stats.totalRounds, icon: Trophy, color: '#6a994e' },
         { label: 'Triputts Medios', value: stats.avgTriputts, icon: MousePointer2, color: '#bc4749' }
     ];
+
+    const TrendChart = ({ data, color, label, unit = '' }) => {
+        if (!data || data.length < 2) {
+            return (
+                <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9f9f9', borderRadius: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Datos insuficientes para gráfica
+                </div>
+            );
+        }
+
+        const maxVal = Math.max(...data, 1);
+        const minVal = Math.min(...data, 0);
+        const range = maxVal - minVal || 1;
+        const width = 300;
+        const height = 80;
+        const padding = 10;
+
+        const points = data.map((val, i) => {
+            const x = (i / (data.length - 1)) * (width - padding * 2) + padding;
+            const y = height - ((val - minVal) / range) * (height - padding * 2) - padding;
+            return `${x},${y}`;
+        }).join(' ');
+
+        return (
+            <div style={{ background: 'white', padding: '1rem', borderRadius: '12px', border: '1px solid #eee' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{label}</span>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: color }}>{data[data.length - 1]}{unit}</span>
+                </div>
+                <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: '80px', display: 'block' }}>
+                    {/* Area gradient placeholder if desired, but line is cleaner */}
+                    <polyline
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        points={points}
+                    />
+                    {data.map((val, i) => {
+                        const x = (i / (data.length - 1)) * (width - padding * 2) + padding;
+                        const y = height - ((val - minVal) / range) * (height - padding * 2) - padding;
+                        return <circle key={i} cx={x} cy={y} r="4" fill="white" stroke={color} strokeWidth="2" />;
+                    })}
+                </svg>
+            </div>
+        );
+    };
 
     return (
         <div className="fade-in">
@@ -270,6 +325,40 @@ export default function Dashboard({ setActiveTab }) {
                             </button>
                         </>
                     )}
+                </div>
+            </div>
+
+            {/* Evolution Charts Section */}
+            <div style={{ marginTop: '3rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                    <div style={{ background: '#f5f5f5', color: 'var(--primary)', padding: '0.5rem', borderRadius: '8px' }}>
+                        <BarChart3 size={20} />
+                    </div>
+                    <h3 style={{ margin: 0 }}>Evolución por Partida</h3>
+                </div>
+
+                <div className="grid grid-cols-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                    <TrendChart
+                        label="Puntos Stableford"
+                        color="#386641"
+                        unit=" pts"
+                        data={roundsHistory.map(r => r.stableford_points || calculateStableford(r.hole_data, r.player_hcp || 40.9))}
+                    />
+                    <TrendChart
+                        label="Media Netos"
+                        color="#6a994e"
+                        data={roundsHistory.map(r => r.score - (getPHCP(r.player_hcp || 40.9)))}
+                    />
+                    <TrendChart
+                        label="Putts Totales"
+                        color="#bc4749"
+                        data={roundsHistory.map(r => r.total_putts || r.hole_data?.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0))}
+                    />
+                    <TrendChart
+                        label="Bolas Perdidas"
+                        color="#1b4332"
+                        data={roundsHistory.map(r => r.total_lost_balls || 0)}
+                    />
                 </div>
             </div>
 

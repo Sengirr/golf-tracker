@@ -209,7 +209,7 @@ export default function Settings() {
                     <div style={{ display: 'flex', overflowX: 'auto', gap: '0.5rem', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
                         {Object.entries(DAYS_MAP).map(([key, label]) => (
                             <button key={key} onClick={() => setSelectedDay(key)} style={{
-                                flex: '0 0 auto', padding: '0.6rem 1rem', borderRadius: '10px', border: 'none',
+                                flex: '0 0 auto', padding: '0.6rem 1rem', borderRadius: '10px',
                                 background: selectedDay === key ? 'var(--primary)' : 'white',
                                 color: selectedDay === key ? 'white' : 'var(--text-muted)',
                                 border: selectedDay === key ? 'none' : '1px solid #eee',

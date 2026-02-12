@@ -67,21 +67,23 @@ export default function Games() {
         };
 
         const { error } = await supabase.from('rounds').insert([{
-            course_name: finalData.course_name,
-            score: parseInt(finalData.score),
-            holes_played: parseInt(finalData.holes_played),
-            triputts: parseInt(finalData.triputts),
-            player_hcp: parseFloat(finalData.player_hcp),
-            stableford_points: finalData.stableford_points || 0,
-            total_putts: finalData.total_putts || 0,
-            total_lost_balls: finalData.total_lost_balls || 0,
+            course_name: finalData.course_name || 'Benalmádena Golf',
+            score: parseInt(finalData.score) || 0,
+            holes_played: parseInt(finalData.holes_played) || 9,
+            triputts: parseInt(finalData.triputts) || 0,
+            player_hcp: parseFloat(finalData.player_hcp) || 40.9,
+            stableford_points: parseInt(finalData.stableford_points) || 0,
+            total_putts: parseInt(finalData.total_putts) || 0,
+            total_lost_balls: parseInt(finalData.total_lost_balls) || 0,
             hole_data: finalData.hole_data,
             date: finalData.date,
-            notes: finalData.notes
+            notes: finalData.notes || ''
         }]);
 
-        if (error) alert('Error al guardar la partida');
-        else {
+        if (error) {
+            console.error('Supabase Save Error Details:', error);
+            alert(`Error al guardar la partida: ${error.message || 'Error desconocido'}`);
+        } else {
             setShowForm(false);
             setFormData({
                 course_name: 'Benalmádena Golf',
