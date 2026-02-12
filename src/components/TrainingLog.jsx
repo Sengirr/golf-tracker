@@ -34,15 +34,43 @@ export default function TrainingLog() {
 
     const saveTimeout = useRef(null);
 
+    const DAYS_LIST = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
     function getDefaultProgress() {
         const prog = {};
-        getAllDrills([]).forEach(drill => {
-            drill.inputs.forEach(input => {
-                if (input.type === 'checkbox') prog[input.key] = false;
-                else prog[input.key] = '';
+        DAYS_LIST.forEach(dayKey => {
+            getAllDrills([]).forEach(drill => {
+                drill.inputs.forEach(input => {
+                    const scopedKey = `${dayKey}__${input.key}`;
+                    if (input.type === 'checkbox') prog[scopedKey] = false;
+                    else prog[scopedKey] = '';
+                });
             });
         });
         return prog;
+    }
+
+    // Migrate old flat keys to day-scoped keys
+    function migrateProgress(oldProgress, weeklyRoutine) {
+        if (!oldProgress) return getDefaultProgress();
+        // Check if already migrated (has at least one day-scoped key)
+        const hasScoped = Object.keys(oldProgress).some(k => k.includes('__'));
+        if (hasScoped) return oldProgress;
+
+        const migrated = { ...getDefaultProgress() };
+        DAYS_LIST.forEach(dayKey => {
+            const dayDrillIds = weeklyRoutine?.[dayKey] || [];
+            dayDrillIds.forEach(id => {
+                const drill = getDrillById(id, []);
+                if (!drill) return;
+                drill.inputs.forEach(input => {
+                    if (oldProgress[input.key] !== undefined && oldProgress[input.key] !== '' && oldProgress[input.key] !== false) {
+                        migrated[`${dayKey}__${input.key}`] = oldProgress[input.key];
+                    }
+                });
+            });
+        });
+        return migrated;
     }
 
     // Load data
@@ -79,10 +107,17 @@ export default function TrainingLog() {
                     .single();
 
                 if (data) {
-                    setProgress({ ...getDefaultProgress(), ...data.progress });
+                    const migrated = migrateProgress(data.progress, currentSettings.weeklyRoutine);
+                    setProgress({ ...getDefaultProgress(), ...migrated });
                 } else {
                     const local = localStorage.getItem(`training_agenda_${currentWeekId} `);
-                    setProgress(local ? { ...getDefaultProgress(), ...JSON.parse(local) } : getDefaultProgress());
+                    if (local) {
+                        const parsed = JSON.parse(local);
+                        const migrated = migrateProgress(parsed, currentSettings.weeklyRoutine);
+                        setProgress({ ...getDefaultProgress(), ...migrated });
+                    } else {
+                        setProgress(getDefaultProgress());
+                    }
                 }
             } catch (err) {
                 console.error("Error loading data:", err);
@@ -153,18 +188,19 @@ export default function TrainingLog() {
 
         const dayDrills = dayDrillIds.map(id => getDrillById(id, settings.customDrills)).filter(Boolean);
 
-        // Simple check: All checkboxes checked, all numeric inputs > 0 (or filled)
         return dayDrills.every(drill => {
             return drill.inputs.every(input => {
-                const val = progress[input.key];
+                const scopedKey = `${dayKey}__${input.key}`;
+                const val = progress[scopedKey];
                 if (input.type === 'checkbox') return val === true;
-                return val !== '' && val !== null && val !== undefined; // Loose check for filled
+                return val !== '' && val !== null && val !== undefined;
             });
         });
     };
 
-    const handleInput = (key, value) => {
-        setProgress(prev => ({ ...prev, [key]: value }));
+    const handleInput = (dayKey, key, value) => {
+        const scopedKey = `${dayKey}__${key}`;
+        setProgress(prev => ({ ...prev, [scopedKey]: value }));
     };
 
     const getScoreColor = (score, max) => {
@@ -182,8 +218,8 @@ export default function TrainingLog() {
     };
 
     const DAYS_MAP = {
-        monday: 'Lunes', tuesday: 'Martes', wednesday: 'Miércoles', thursday: 'Jueves',
-        friday: 'Viernes', saturday: 'Sábado', sunday: 'Domingo'
+        monday: 'Lunes', tuesday: 'Martes', wednesday: 'Mi\u00e9rcoles', thursday: 'Jueves',
+        friday: 'Viernes', saturday: 'S\u00e1bado', sunday: 'Domingo'
     };
 
     const EvolutionView = () => {
@@ -262,20 +298,23 @@ export default function TrainingLog() {
                                                         </div>
                                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 1rem 0' }}>{drill.description}</p>
                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                                            {drill.inputs.map(input => (
-                                                                <div key={input.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                    <span style={{ fontSize: '0.9rem' }}>{input.label}</span>
-                                                                    {input.type === 'checkbox' ? (
-                                                                        <input type="checkbox" checked={progress[input.key] || false} onChange={(e) => handleInput(input.key, e.target.checked)} style={{ width: '24px', height: '24px', accentColor: cat.color }} />
-                                                                    ) : (
-                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                                            <button onClick={() => handleInput(input.key, Math.max(0, parseInt(progress[input.key] || 0) - 1))} style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #ddd', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={14} /></button>
-                                                                            <input type="number" value={progress[input.key]} onChange={(e) => handleInput(input.key, e.target.value)} style={{ width: '50px', padding: '0.4rem', borderRadius: '8px', border: '2px solid', borderColor: getScoreColor(progress[input.key], input.max || 10), textAlign: 'center', fontWeight: 'bold' }} />
-                                                                            <button onClick={() => handleInput(input.key, Math.min(input.max || 100, parseInt(progress[input.key] || 0) + 1))} style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #ddd', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={14} /></button>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))}
+                                                            {drill.inputs.map(input => {
+                                                                const scopedKey = `${dayKey}__${input.key}`;
+                                                                return (
+                                                                    <div key={scopedKey} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                        <span style={{ fontSize: '0.9rem' }}>{input.label}</span>
+                                                                        {input.type === 'checkbox' ? (
+                                                                            <input type="checkbox" checked={progress[scopedKey] || false} onChange={(e) => handleInput(dayKey, input.key, e.target.checked)} style={{ width: '24px', height: '24px', accentColor: cat.color }} />
+                                                                        ) : (
+                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                                <button onClick={() => handleInput(dayKey, input.key, Math.max(0, parseInt(progress[scopedKey] || 0) - 1))} style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #ddd', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={14} /></button>
+                                                                                <input type="number" value={progress[scopedKey] || ''} onChange={(e) => handleInput(dayKey, input.key, e.target.value)} style={{ width: '50px', padding: '0.4rem', borderRadius: '8px', border: '2px solid', borderColor: getScoreColor(progress[scopedKey], input.max || 10), textAlign: 'center', fontWeight: 'bold' }} />
+                                                                                <button onClick={() => handleInput(dayKey, input.key, Math.min(input.max || 100, parseInt(progress[scopedKey] || 0) + 1))} style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid #ddd', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={14} /></button>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
                                                         </div>
                                                     </div>
                                                 ))}
