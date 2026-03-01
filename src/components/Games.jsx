@@ -140,10 +140,12 @@ export default function Games() {
                 background: 'rgba(0,0,0,0.8)',
                 zIndex: 9999,
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'flex-start', // Changed from center to flex-start
                 justifyContent: 'center',
                 padding: '1rem',
-                backdropFilter: 'blur(4px)'
+                paddingTop: '2rem', // Ensure it's not hidden behind the notch/header
+                backdropFilter: 'blur(4px)',
+                overflowY: 'auto' // Ensure the overlay itself can scroll if needed
             }}>
                 <div className="card fade-in" style={{
                     width: '100%',
