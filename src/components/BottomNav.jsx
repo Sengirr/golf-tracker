@@ -1,11 +1,11 @@
-import React from 'react';
-import { LayoutDashboard, Trophy, BookOpen, Calendar as CalendarIcon } from 'lucide-react';
+import { LayoutDashboard, Trophy, BookOpen, Calendar as CalendarIcon, Users } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab }) {
     const tabs = [
         { id: 'dashboard', label: 'Panel', icon: LayoutDashboard },
         { id: 'games', label: 'Partidas', icon: Trophy },
         { id: 'agenda', label: 'Entreno', icon: BookOpen },
+        { id: 'friends', label: 'Amigos', icon: Users },
         { id: 'tournaments', label: 'Torneos', icon: CalendarIcon }
     ];
 

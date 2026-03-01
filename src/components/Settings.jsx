@@ -155,7 +155,7 @@ export default function Settings() {
     };
 
     return (
-        <div className="fade-in" style={{ paddingBottom: '100px' }}>
+        <div style={{ paddingBottom: '100px' }}>
             <div style={{ marginBottom: '1.5rem' }}>
                 <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.75rem' }}>
                     <User size={24} className="text-primary" />

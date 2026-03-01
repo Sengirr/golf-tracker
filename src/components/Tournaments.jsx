@@ -98,7 +98,7 @@ export default function Tournaments() {
     };
 
     return (
-        <div className="fade-in">
+        <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                 <div>
                     <h1>Calendario de Torneos</h1>

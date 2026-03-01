@@ -247,7 +247,7 @@ export default function TrainingLog() {
     };
 
     return (
-        <div className="fade-in" style={{ paddingBottom: '120px' }}>
+        <div style={{ paddingBottom: '120px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ flex: '1 1 200px' }}>
                     <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Entrenamiento</h1>

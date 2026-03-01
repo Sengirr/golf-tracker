@@ -3,6 +3,7 @@ import Dashboard from './components/Dashboard';
 import Games from './components/Games';
 import Tournaments from './components/Tournaments';
 import TrainingLog from './components/TrainingLog';
+import Friends from './components/Friends';
 import Settings from './components/Settings';
 import BottomNav from './components/BottomNav';
 import Auth from './components/Auth';
@@ -35,6 +36,7 @@ function App() {
       case 'dashboard': return <Dashboard setActiveTab={setActiveTab} />;
       case 'games': return <Games />;
       case 'agenda': return <TrainingLog />;
+      case 'friends': return <Friends />;
       case 'tournaments': return <Tournaments />;
       case 'settings': return <Settings />;
       default: return <Dashboard setActiveTab={setActiveTab} />;
@@ -54,7 +56,7 @@ function App() {
   }
 
   return (
-    <div className="fade-in" style={{ paddingBottom: '80px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <nav style={{ justifyContent: 'center', position: 'sticky', top: 0, zIndex: 1000, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)' }}>
         <div className="nav-logo">
           <div className="nav-logo-icon">
@@ -70,15 +72,17 @@ function App() {
         </button>
       </nav>
 
-      <main className="container" style={{ paddingTop: '1.5rem', marginBottom: '4rem' }}>
+      <main className="container" style={{ paddingTop: '1.5rem', marginBottom: '8rem', flex: 1 }}>
         <SubscriptionProvider>
-          {renderContent()}
+          <div className="fade-in" key={activeTab}>
+            {renderContent()}
+          </div>
         </SubscriptionProvider>
       </main>
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <footer style={{ marginTop: '4rem', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+      <footer style={{ marginBottom: '6rem', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
         <p>© 2026 GolfTracker Premium. Juega con confianza.</p>
       </footer>
     </div>

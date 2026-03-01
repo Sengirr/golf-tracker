@@ -16,8 +16,12 @@ export default function Games() {
         player_hcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
         date: new Date().toISOString().split('T')[0],
         notes: '',
-        hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false, lost_balls: 0 })
+        hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false, lost_balls: 0 }),
+        participants: []
     });
+    const [friends, setFriends] = useState([]);
+    const [activeSession, setActiveSession] = useState(null);
+    const [openSessions, setOpenSessions] = useState([]); // Sessions to join
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -27,7 +31,48 @@ export default function Games() {
 
     useEffect(() => {
         fetchRounds();
+        fetchFriends();
+        fetchOpenSessions();
     }, []);
+
+    async function fetchOpenSessions() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Fetch active sessions from friends
+        const friendIds = friends.map(f => f.id);
+        const { data } = await supabase
+            .from('game_sessions')
+            .select(`
+                id, 
+                course_name, 
+                host:host_id(username)
+            `)
+            .eq('status', 'active')
+            .neq('host_id', user.id);
+        // In a real app we would filter by friends, for simplicity we show all active for now
+
+        if (data) setOpenSessions(data);
+    }
+
+    async function fetchFriends() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data } = await supabase
+            .from('friendships')
+            .select(`
+                friend:friend_id(id, username),
+                user:user_id(id, username)
+            `)
+            .eq('status', 'accepted')
+            .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`);
+
+        if (data) {
+            const friendList = data.map(f => f.user.id === user.id ? f.friend : f.user);
+            setFriends(friendList);
+        }
+    }
 
     async function fetchRounds() {
         setLoading(true);
@@ -48,48 +93,55 @@ export default function Games() {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        let finalData = { ...formData };
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        let sessionId = null;
+
+        // If friends are selected, create a shared session
+        if (formData.participants.length > 0) {
+            const { data: sessionData, error: sessionError } = await supabase
+                .from('game_sessions')
+                .insert([{
+                    host_id: user.id,
+                    course_name: formData.course_name,
+                    status: 'active'
+                }])
+                .select()
+                .single();
+
+            if (sessionError) {
+                console.error('Error creating session:', sessionError);
+            } else {
+                sessionId = sessionData.id;
+            }
+        }
 
         const totalStrokes = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.strokes) || 0), 0);
         const totalTriputts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) >= 3 ? 1 : 0), 0);
-
-        // Stableford Calculation - Adjusted for 9-hole P&P
         const hcp = parseFloat(formData.player_hcp) || 40.9;
         const points = calculateStableford(formData.hole_data, hcp);
-
         const totalLostBalls = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0);
         const totalPutts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0);
 
-        finalData = {
-            ...formData,
+        const { error } = await supabase.from('rounds').insert([{
+            user_id: user.id,
+            course_name: formData.course_name || 'Benalmádena Golf',
             score: totalStrokes,
+            holes_played: parseInt(formData.holes_played) || 9,
             triputts: totalTriputts,
+            player_hcp: hcp,
+            stableford_points: points,
             total_putts: totalPutts,
             total_lost_balls: totalLostBalls,
-            stableford_points: points,
-            player_hcp: hcp
-        };
-
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const { error } = await supabase.from('rounds').insert([{
-            user_id: user?.id,
-            course_name: finalData.course_name || 'Benalmádena Golf',
-            score: parseInt(finalData.score) || 0,
-            holes_played: parseInt(finalData.holes_played) || 9,
-            triputts: parseInt(finalData.triputts) || 0,
-            player_hcp: parseFloat(finalData.player_hcp) || 40.9,
-            stableford_points: parseInt(finalData.stableford_points) || 0,
-            total_putts: parseInt(finalData.total_putts) || 0,
-            total_lost_balls: parseInt(finalData.total_lost_balls) || 0,
-            hole_data: finalData.hole_data,
-            date: finalData.date,
-            notes: finalData.notes || ''
+            hole_data: formData.hole_data,
+            date: formData.date,
+            notes: formData.notes || '',
+            shared_session_id: sessionId
         }]);
 
         if (error) {
-            console.error('Supabase Save Error Details:', error);
-            alert(`Error al guardar la partida: ${error.message || 'Error desconocido'}`);
+            alert(`Error al guardar la partida: ${error.message}`);
         } else {
             setShowForm(false);
             setFormData({
@@ -100,7 +152,8 @@ export default function Games() {
                 player_hcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
                 date: new Date().toISOString().split('T')[0],
                 notes: '',
-                hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false, lost_balls: 0 })
+                hole_data: Array(9).fill({ strokes: 3, putts: 2, fir: true, gir: false, lost_balls: 0 }),
+                participants: []
             });
             fetchRounds();
         }
@@ -125,6 +178,85 @@ export default function Games() {
             else fetchRounds();
         }
     }
+
+    const LiveLeaderboard = ({ sessionId, onClose }) => {
+        const [sessionRounds, setSessionRounds] = useState([]);
+
+        useEffect(() => {
+            if (!sessionId) return;
+            fetchSessionRounds();
+
+            const channel = supabase
+                .channel(`session-${sessionId}`)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'rounds',
+                    filter: `shared_session_id=eq.${sessionId}`
+                }, () => {
+                    fetchSessionRounds();
+                })
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        }, [sessionId]);
+
+        async function fetchSessionRounds() {
+            const { data } = await supabase
+                .from('rounds')
+                .select(`
+                    id, 
+                    score, 
+                    player_hcp, 
+                    stableford_points,
+                    profiles:user_id(username)
+                `)
+                .eq('shared_session_id', sessionId);
+
+            if (data) setSessionRounds(data);
+        }
+
+        return (
+            <div style={{
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.85)', zIndex: 10000,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+            }}>
+                <div className="card" style={{ width: '100%', maxWidth: '400px', background: 'white', padding: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Sparkles size={24} color="var(--primary)" /> Marcador Vivo
+                        </h2>
+                        <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {sessionRounds.sort((a, b) => b.stableford_points - a.stableford_points).map((r, idx) => (
+                            <div key={r.id} style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                padding: '1rem', borderRadius: '12px',
+                                background: idx === 0 ? '#fffef2' : '#f9f9f9',
+                                border: idx === 0 ? '2px solid #ffd700' : '1px solid #eee'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    <span style={{ fontWeight: 800, fontSize: '1.2rem', color: idx === 0 ? '#daa520' : '#888' }}>#{idx + 1}</span>
+                                    <span style={{ fontWeight: 700 }}>{r.profiles?.username || 'Invitado'}</span>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                    <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)' }}>STABLEFORD</span>
+                                    <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--primary)' }}>{r.stableford_points} pts</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button className="btn-primary" onClick={onClose} style={{ width: '100%', marginTop: '1.5rem' }}>Volver al Juego</button>
+                </div>
+            </div>
+        );
+    };
 
     const RoundDetailModal = ({ round, onClose }) => {
         if (!round) return null;
@@ -248,7 +380,7 @@ export default function Games() {
     };
 
     return (
-        <div className="fade-in">
+        <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                 <div>
                     <h1>Historial de Juego</h1>
@@ -258,6 +390,35 @@ export default function Games() {
                     <Plus size={20} /> {showForm ? 'Cancelar' : 'Registrar Partida'}
                 </button>
             </div>
+
+            {openSessions.length > 0 && !showForm && (
+                <div className="card" style={{ marginBottom: '2rem', background: '#fffef2', border: '2px solid #ffd700' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                        <Sparkles size={24} color="#daa520" />
+                        <h3 style={{ margin: 0 }}>¡Hay una partida en vivo!</h3>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {openSessions.map(session => (
+                            <div key={session.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <strong>{session.host?.username}</strong> jugando en <strong>{session.course_name}</strong>
+                                </div>
+                                <button
+                                    className="btn-primary"
+                                    style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+                                    onClick={() => {
+                                        setFormData({ ...formData, shared_session_id: session.id, course_name: session.course_name });
+                                        setShowForm(true);
+                                        setActiveSession(session.id);
+                                    }}
+                                >
+                                    Unirse
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '2rem' }}>
@@ -294,6 +455,45 @@ export default function Games() {
                                     onChange={e => setFormData({ ...formData, player_hcp: e.target.value })}
                                     placeholder="ej. 24.5"
                                 />
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2', marginBottom: '1.5rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, marginBottom: '1rem' }}>
+                                    <Sparkles size={18} color="var(--primary)" /> Jugar con Amigos (Partida Compartida)
+                                </label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    {friends.length === 0 ? (
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Añade amigos en la pestaña "Amigos" para jugar juntos.</p>
+                                    ) : (
+                                        friends.map(friend => (
+                                            <button
+                                                key={friend.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    const isSelected = formData.participants.includes(friend.id);
+                                                    const newParticipants = isSelected
+                                                        ? formData.participants.filter(id => id !== friend.id)
+                                                        : [...formData.participants, friend.id];
+                                                    setFormData({ ...formData, participants: newParticipants });
+                                                }}
+                                                style={{
+                                                    padding: '0.5rem 0.75rem',
+                                                    borderRadius: '20px',
+                                                    border: '1px solid',
+                                                    borderColor: formData.participants.includes(friend.id) ? 'var(--primary)' : '#eee',
+                                                    background: formData.participants.includes(friend.id) ? 'var(--primary)' : 'white',
+                                                    color: formData.participants.includes(friend.id) ? 'white' : 'var(--text-muted)',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 600,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {friend.username}
+                                            </button>
+                                        ))
+                                    )}
+                                </div>
                             </div>
 
                             <div style={{ gridColumn: 'span 2' }}>
@@ -385,7 +585,20 @@ export default function Games() {
                                 />
                             </div>
                         </div>
-                        <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>Guardar Partida</button>
+
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                            <button type="submit" className="btn-primary" style={{ flex: 2 }}>Guardar Partida</button>
+                            {(activeSession || formData.participants.length > 0) && (
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveSession(activeSession || 'pending')}
+                                    className="btn-primary"
+                                    style={{ flex: 1, background: 'var(--accent)', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                >
+                                    <Sparkles size={18} /> Ver Líderes
+                                </button>
+                            )}
+                        </div>
                     </form>
                 </div>
             )}
@@ -429,50 +642,43 @@ export default function Games() {
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
                                         <h3 style={{ margin: 0, fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{round.course_name}</h3>
-                                        {round.hole_data && (
-                                            <button
-                                                onClick={() => setSelectedRound(round)}
-                                                style={{ background: 'var(--accent)', color: 'var(--primary-dark)', padding: '0.2rem 0.6rem', borderRadius: '20px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                                            >
-                                                DETALLE
-                                            </button>
-                                        )}
+                                        <button
+                                            onClick={() => setSelectedRound(round)}
+                                            style={{ background: 'var(--accent)', color: 'var(--primary-dark)', padding: '0.2rem 0.6rem', borderRadius: '20px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                        >
+                                            DETALLE
+                                        </button>
                                     </div>
                                     <div style={{ display: 'flex', gap: '0.5rem 0.75rem', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><Calendar size={12} /> {formatDate(round.date)}</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }} className="mobile-hide"><Hash size={12} /> {round.holes_played} hoyos</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
-                                            <strong>P:</strong> {round.total_putts || round.hole_data?.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0)}
+                                            <strong>P:</strong> {round.total_putts || 0}
                                         </span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                             <strong>GIR:</strong> {round.hole_data?.filter(h => h.gir).length || 0}
                                         </span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#386641' }}>
-                                            <strong>{round.hole_data ? calculateStableford(round.hole_data, round.player_hcp) : round.stableford_points}</strong> pts
+                                            <strong>{round.stableford_points}</strong> pts
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => deleteRound(round.id)}
-                                style={{ background: 'none', color: '#ff4d4d', padding: '0.4rem', borderTop: '1px solid #eee', width: '100%', display: 'flex', justifyContent: 'center' }}
-                                className="mobile-only-header"
-                            >
-                                <Trash2 size={18} />
-                            </button>
-                            <button
-                                onClick={() => deleteRound(round.id)}
-                                style={{ background: 'none', color: '#ff4d4d', padding: '0.5rem', marginLeft: '1rem' }}
-                                className="mobile-hide"
-                            >
-                                <Trash2 size={20} />
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button
+                                    onClick={() => deleteRound(round.id)}
+                                    style={{ background: 'none', color: '#ff4d4d', padding: '0.5rem', border: 'none', cursor: 'pointer' }}
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            </div>
                         </div>
                     ))
                 )}
             </div>
 
             {selectedRound && <RoundDetailModal round={selectedRound} onClose={() => setSelectedRound(null)} />}
+            {activeSession && <LiveLeaderboard sessionId={activeSession} onClose={() => setActiveSession(null)} />}
         </div>
     );
 }
