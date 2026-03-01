@@ -71,6 +71,16 @@ export default function Tournaments() {
         else fetchTournaments();
     }
 
+    async function updateTournamentStatus(id, status) {
+        const { error } = await supabase
+            .from('tournaments')
+            .update({ status })
+            .eq('id', id);
+
+        if (error) alert('Error al actualizar el estado');
+        else fetchTournaments();
+    }
+
     async function deleteTournament(id) {
         if (confirm('¿Estás seguro de que quieres eliminar este torneo?')) {
             const { error } = await supabase.from('tournaments').delete().eq('id', id);
@@ -185,28 +195,37 @@ export default function Tournaments() {
                                     <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {tourney.course}</span>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {formatDate(tourney.date)}</span>
-                                        <span style={{
-                                            padding: '2px 8px',
-                                            borderRadius: '4px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 700,
-                                            ...getStatusStyle(tourney.status)
-                                        }}>
-                                            {tourney.status.toUpperCase()}
-                                        </span>
+
+                                        <select
+                                            value={tourney.status}
+                                            onChange={(e) => updateTournamentStatus(tourney.id, e.target.value)}
+                                            style={{
+                                                padding: '2px 8px',
+                                                borderRadius: '4px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                ...getStatusStyle(tourney.status)
+                                            }}
+                                        >
+                                            <option value="Interesado">INTERESADO</option>
+                                            <option value="Inscrito">INSCRITO</option>
+                                            <option value="Completado">COMPLETADO</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                {tourney.status === 'Completado' && !tourney.result && (
+                                {tourney.status === 'Completado' && (
                                     <button
                                         onClick={() => {
-                                            const res = prompt('Añadir resultado (ej. Top 10, 36pts...):');
-                                            if (res) updateTournamentResult(tourney.id, res);
+                                            const res = prompt('Añadir resultado (ej. Top 10, 36pts...):', tourney.result || '');
+                                            if (res !== null) updateTournamentResult(tourney.id, res);
                                         }}
                                         style={{ background: 'none', color: 'var(--primary)', padding: '0.5rem', fontWeight: 700, fontSize: '0.75rem' }}
                                     >
-                                        EDITAR RESULTADO
+                                        {tourney.result ? 'EDITAR RESULTADO' : 'AÑADIR RESULTADO'}
                                     </button>
                                 )}
                                 <button
