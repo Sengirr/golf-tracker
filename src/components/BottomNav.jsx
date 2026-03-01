@@ -12,19 +12,19 @@ export default function BottomNav({ activeTab, setActiveTab }) {
     return (
         <div className="bottom-nav-container" style={{
             position: 'fixed',
-            bottom: '2.5rem',
-            left: '1rem',
-            right: '1rem',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(15px)',
-            borderRadius: '24px',
+            bottom: '1rem', // Lowered for better accessibility and less overlap
+            left: '0.75rem',
+            right: '0.75rem',
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '20px',
             display: 'flex',
             justifyContent: 'space-around',
             alignItems: 'center',
-            padding: '0.5rem',
+            padding: '0.4rem',
             zIndex: 2000,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            border: '1px solid rgba(255,255,255,0.2)'
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            border: '1px solid rgba(255,255,255,0.3)'
         }}>
             {tabs.map(tab => (
                 <button

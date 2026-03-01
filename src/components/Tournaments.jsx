@@ -178,31 +178,42 @@ export default function Tournaments() {
                     </div>
                 ) : (
                     tournaments.map(tourney => (
-                        <div key={tourney.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                                <div style={{ background: tourney.status === 'Completado' ? 'var(--primary)' : '#bc4749', color: 'white', width: '60px', height: '60px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Calendar size={24} />
+                        <div key={tourney.id} className="card flex-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1, width: '100%' }}>
+                                <div style={{
+                                    background: tourney.status === 'Completado' ? 'var(--primary)' : '#bc4749',
+                                    color: 'white',
+                                    width: '50px',
+                                    height: '50px',
+                                    borderRadius: '10px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    flexShrink: 0
+                                }}>
+                                    <Calendar size={20} />
                                 </div>
-                                <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <h3 style={{ margin: 0 }}>{tourney.name}</h3>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tourney.name}</h3>
                                         {tourney.result && (
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fff3b0', color: '#856404', padding: '2px 8px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>
-                                                <Trophy size={12} /> {tourney.result}
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fff3b0', color: '#856404', padding: '2px 6px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800 }}>
+                                                <Trophy size={10} /> {tourney.result}
                                             </span>
                                         )}
                                     </div>
-                                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {tourney.course}</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {formatDate(tourney.date)}</span>
+                                    <div style={{ display: 'flex', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={12} /> {tourney.course}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={12} /> {formatDate(tourney.date)}</span>
 
                                         <select
                                             value={tourney.status}
                                             onChange={(e) => updateTournamentStatus(tourney.id, e.target.value)}
                                             style={{
-                                                padding: '2px 8px',
+                                                padding: '1px 6px',
                                                 borderRadius: '4px',
-                                                fontSize: '0.75rem',
+                                                fontSize: '0.7rem',
                                                 fontWeight: 700,
                                                 border: 'none',
                                                 cursor: 'pointer',
@@ -216,7 +227,28 @@ export default function Tournaments() {
                                     </div>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end', width: '100%', borderTop: '1px solid #eee', paddingTop: '0.5rem', marginTop: '0.25rem' }} className="mobile-only-header">
+                                {tourney.status === 'Completado' && (
+                                    <button
+                                        onClick={() => {
+                                            const res = prompt('Añadir resultado (ej. Top 10, 36pts...):', tourney.result || '');
+                                            if (res !== null) updateTournamentResult(tourney.id, res);
+                                        }}
+                                        style={{ background: 'none', color: 'var(--primary)', padding: '0.4rem', fontWeight: 700, fontSize: '0.7rem' }}
+                                    >
+                                        {tourney.result ? 'EDITAR' : 'RESULTADO'}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => deleteTournament(tourney.id)}
+                                    style={{ background: 'none', color: '#ff4d4d', padding: '0.4rem' }}
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+
+                            {/* Desktop only buttons layout */}
+                            <div style={{ display: 'flex', gap: '0.5rem' }} className="mobile-hide">
                                 {tourney.status === 'Completado' && (
                                     <button
                                         onClick={() => {

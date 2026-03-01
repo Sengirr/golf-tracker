@@ -150,7 +150,7 @@ export default function Games() {
                     maxWidth: '500px',
                     maxHeight: '90vh',
                     overflowY: 'auto',
-                    padding: '1.5rem',
+                    padding: '1rem', // Reduced padding
                     background: 'white',
                     position: 'relative',
                     boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
@@ -171,71 +171,73 @@ export default function Games() {
                         </div>
                     </div>
 
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee' }}>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>H</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>PAR(SI)</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>BRU</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>NET</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>P</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>GIR</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem' }}>B</th>
-                                <th style={{ padding: '0.4rem', fontSize: '0.75rem', textAlign: 'right' }}>PTS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {round.hole_data.map((hole, idx) => {
-                                const par = BENALMADENA_SCORECARD.pars[idx];
-                                const si = BENALMADENA_SCORECARD.si[idx];
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '400px' }}>
+                            <thead>
+                                <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee' }}>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem' }}>H</th>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem' }}>PAR(SI)</th>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem' }}>BRU</th>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem' }}>NET</th>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem' }}>P</th>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem' }} className="mobile-hide">GIR</th>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem' }} className="mobile-hide">B</th>
+                                    <th style={{ padding: '0.4rem', fontSize: '0.7rem', textAlign: 'right' }}>PTS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {round.hole_data.map((hole, idx) => {
+                                    const par = BENALMADENA_SCORECARD.pars[idx];
+                                    const si = BENALMADENA_SCORECARD.si[idx];
 
-                                let strokesAllowed = Math.floor(playingHCP / 9);
-                                const extraStrokes = playingHCP % 9;
-                                // Hole 8 (SI 1) is Rank 1, Hole 2 (SI 17) is Rank 9
-                                const siList = [1, 3, 5, 7, 9, 11, 13, 15, 17];
-                                const difficultyRank = siList.indexOf(si) + 1;
-                                if (difficultyRank <= extraStrokes) strokesAllowed += 1;
+                                    let strokesAllowed = Math.floor(playingHCP / 9);
+                                    const extraStrokes = playingHCP % 9;
+                                    // Hole 8 (SI 1) is Rank 1, Hole 2 (SI 17) is Rank 9
+                                    const siList = [1, 3, 5, 7, 9, 11, 13, 15, 17];
+                                    const difficultyRank = siList.indexOf(si) + 1;
+                                    if (difficultyRank <= extraStrokes) strokesAllowed += 1;
 
-                                const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
-                                const holePoints = Math.max(0, 2 + par - netScore);
+                                    const netScore = (parseInt(hole.strokes) || 0) - strokesAllowed;
+                                    const holePoints = Math.max(0, 2 + par - netScore);
 
-                                return (
-                                    <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700 }}>{idx + 1}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem' }}>
-                                            {par} <small style={{ color: 'var(--text-muted)' }}>({si})</small>
-                                        </td>
-                                        <td style={{ padding: '0.75rem 0.5rem' }}>{hole.strokes}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem' }}>
-                                            {netScore}
-                                            {strokesAllowed > 0 && Array(strokesAllowed).fill('•').map((dot, i) => (
-                                                <span key={i} style={{ color: 'var(--primary)', marginLeft: '2px', verticalAlign: 'top', fontSize: '1.2rem', lineHeight: '0' }}>.</span>
-                                            ))}
-                                        </td>
-                                        <td style={{ padding: '0.75rem 0.5rem' }}>{hole.putts}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem' }}>{hole.gir ? '✓' : ''}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem' }}>{hole.lost_balls || 0}</td>
-                                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--primary)' }}>
-                                            {holePoints}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                        <tfoot>
-                            <tr style={{ borderTop: '2px solid #eee', fontWeight: 800 }}>
-                                <td colSpan="2" style={{ padding: '1rem 0.5rem' }}>TOTAL</td>
-                                <td style={{ padding: '1rem 0.5rem' }}>{round.score}</td>
-                                <td style={{ padding: '1rem 0.5rem' }}>{round.score - playingHCP}</td>
-                                <td style={{ padding: '1rem 0.5rem' }}>{round.total_putts || round.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0)}</td>
-                                <td style={{ padding: '1rem 0.5rem' }}>{round.hole_data.filter(h => h.gir).length}</td>
-                                <td style={{ padding: '1rem 0.5rem' }}>{round.total_lost_balls || round.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0)}</td>
-                                <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
-                                    {calculateStableford(round.hole_data, round.player_hcp)}
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                                    return (
+                                        <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                                            <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700 }}>{idx + 1}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem' }}>
+                                                {par} <small style={{ color: 'var(--text-muted)' }}>({si})</small>
+                                            </td>
+                                            <td style={{ padding: '0.75rem 0.5rem' }}>{hole.strokes}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem' }}>
+                                                {netScore}
+                                                {strokesAllowed > 0 && Array(strokesAllowed).fill('•').map((dot, i) => (
+                                                    <span key={i} style={{ color: 'var(--primary)', marginLeft: '2px', verticalAlign: 'top', fontSize: '1.2rem', lineHeight: '0' }}>.</span>
+                                                ))}
+                                            </td>
+                                            <td style={{ padding: '0.75rem 0.5rem' }}>{hole.putts}</td>
+                                            <td className="mobile-hide" style={{ padding: '0.75rem 0.5rem' }}>{hole.gir ? '✓' : ''}</td>
+                                            <td className="mobile-hide" style={{ padding: '0.75rem 0.5rem' }}>{hole.lost_balls || 0}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--primary)' }}>
+                                                {holePoints}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                            <tfoot>
+                                <tr style={{ borderTop: '2px solid #eee', fontWeight: 800, fontSize: '0.8rem' }}>
+                                    <td colSpan="2" style={{ padding: '1rem 0.5rem' }}>TOTAL</td>
+                                    <td style={{ padding: '1rem 0.5rem' }}>{round.score}</td>
+                                    <td style={{ padding: '1rem 0.5rem' }}>{round.score - playingHCP}</td>
+                                    <td style={{ padding: '1rem 0.5rem' }}>{round.total_putts || round.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0)}</td>
+                                    <td className="mobile-hide" style={{ padding: '1rem 0.5rem' }}>{round.hole_data.filter(h => h.gir).length}</td>
+                                    <td className="mobile-hide" style={{ padding: '1rem 0.5rem' }}>{round.total_lost_balls || round.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0)}</td>
+                                    <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
+                                        {calculateStableford(round.hole_data, round.player_hcp)}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
                     <button className="btn-primary" onClick={onClose} style={{ width: '100%', marginTop: '1.5rem' }}>Cerrar</button>
                 </div>
@@ -395,53 +397,71 @@ export default function Games() {
                     </div>
                 ) : (
                     rounds.map(round => (
-                        <div key={round.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flex: 1 }}>
-                                <div style={{ background: 'var(--primary)', color: 'white', width: '80px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', overflow: 'hidden', cursor: 'pointer' }} onClick={() => setSelectedRound(round)}>
-                                    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', width: '100%', padding: '0.4rem 0.25rem' }}>
-                                        <span style={{ fontSize: '0.6rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>BRUTOS</span>
-                                        <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>{round.score}</span>
+                        <div key={round.id} className="card flex-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1, width: '100%' }}>
+                                <div style={{
+                                    background: 'var(--primary)',
+                                    color: 'white',
+                                    width: '70px',
+                                    borderRadius: '10px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    textAlign: 'center',
+                                    overflow: 'hidden',
+                                    cursor: 'pointer',
+                                    flexShrink: 0
+                                }} onClick={() => setSelectedRound(round)}>
+                                    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', width: '100%', padding: '0.3rem 0.2rem' }}>
+                                        <span style={{ fontSize: '0.55rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>BRUTOS</span>
+                                        <span style={{ fontSize: '1rem', fontWeight: 700 }}>{round.score}</span>
                                     </div>
-                                    <div style={{ width: '100%', padding: '0.4rem 0.25rem', background: 'rgba(255,255,255,0.1)' }}>
-                                        <span style={{ fontSize: '0.6rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>NETOS</span>
-                                        <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+                                    <div style={{ width: '100%', padding: '0.3rem 0.2rem', background: 'rgba(255,255,255,0.1)' }}>
+                                        <span style={{ fontSize: '0.55rem', fontWeight: 600, display: 'block', opacity: 0.8 }}>NETOS</span>
+                                        <span style={{ fontSize: '1rem', fontWeight: 700 }}>
                                             {round.score - getPHCP(round.player_hcp || 40.9)}
                                         </span>
                                     </div>
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <h3 style={{ margin: 0 }}>{round.course_name}</h3>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{round.course_name}</h3>
                                         {round.hole_data && (
                                             <button
                                                 onClick={() => setSelectedRound(round)}
-                                                style={{ background: 'var(--accent)', color: 'var(--primary-dark)', padding: '0.25rem 0.75rem', borderRadius: '20px', border: 'none', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                                                style={{ background: 'var(--accent)', color: 'var(--primary-dark)', padding: '0.2rem 0.6rem', borderRadius: '20px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}
                                             >
-                                                VER DETALLE
+                                                DETALLE
                                             </button>
                                         )}
                                     </div>
-                                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> {formatDate(round.date)}</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Hash size={14} /> {round.holes_played} hoyos</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
-                                            <strong>Putts:</strong> {round.total_putts || round.hole_data?.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0)}
+                                    <div style={{ display: 'flex', gap: '0.5rem 0.75rem', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}><Calendar size={12} /> {formatDate(round.date)}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }} className="mobile-hide"><Hash size={12} /> {round.holes_played} hoyos</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: round.triputts > 2 ? '#bc4749' : 'inherit' }}>
+                                            <strong>P:</strong> {round.total_putts || round.hole_data?.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0)}
                                         </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                                             <strong>GIR:</strong> {round.hole_data?.filter(h => h.gir).length || 0}
                                         </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: (round.total_lost_balls || 0) > 0 ? '#bc4749' : 'inherit' }}>
-                                            <strong>Bolas:</strong> {round.total_lost_balls || 0}
-                                        </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#386641' }}>
-                                            <strong>Stableford:</strong> {round.hole_data ? calculateStableford(round.hole_data, round.player_hcp) : round.stableford_points} pts
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#386641' }}>
+                                            <strong>{round.hole_data ? calculateStableford(round.hole_data, round.player_hcp) : round.stableford_points}</strong> pts
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             <button
                                 onClick={() => deleteRound(round.id)}
+                                style={{ background: 'none', color: '#ff4d4d', padding: '0.4rem', borderTop: '1px solid #eee', width: '100%', display: 'flex', justifyContent: 'center' }}
+                                className="mobile-only-header"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                            <button
+                                onClick={() => deleteRound(round.id)}
                                 style={{ background: 'none', color: '#ff4d4d', padding: '0.5rem', marginLeft: '1rem' }}
+                                className="mobile-hide"
                             >
                                 <Trash2 size={20} />
                             </button>

@@ -156,12 +156,12 @@ export default function Settings() {
 
     return (
         <div className="fade-in" style={{ paddingBottom: '100px' }}>
-            <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <User size={28} className="text-primary" />
-                    Ajustes de Perfil
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.75rem' }}>
+                    <User size={24} className="text-primary" />
+                    Ajustes
                 </h1>
-                <p style={{ color: 'var(--text-muted)' }}>Personaliza tu experiencia de entrenamiento.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Personaliza tu experiencia.</p>
             </div>
 
             <div style={sectionStyle}>
@@ -207,7 +207,10 @@ export default function Settings() {
                     <label style={{ ...labelStyle, marginBottom: '1rem' }}>Planificador Semanal</label>
 
                     {/* Day Selector */}
-                    <div style={{ display: 'flex', overflowX: 'auto', gap: '0.5rem', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', overflowX: 'auto', gap: '0.4rem', paddingBottom: '0.5rem', marginBottom: '1rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        <style>{`
+                            div::-webkit-scrollbar { display: none; }
+                        `}</style>
                         {Object.entries(DAYS_MAP).map(([key, label]) => (
                             <button key={key} onClick={() => setSelectedDay(key)} style={{
                                 flex: '0 0 auto', padding: '0.6rem 1rem', borderRadius: '10px',

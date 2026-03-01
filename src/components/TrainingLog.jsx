@@ -248,23 +248,23 @@ export default function TrainingLog() {
 
     return (
         <div className="fade-in" style={{ paddingBottom: '120px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
-                    <h1>Entrenamiento Semanal</h1>
-                    <p style={{ color: 'var(--text-muted)', margin: 0 }}>Tu hoja de ruta para bajar el hándicap.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ flex: '1 1 200px' }}>
+                    <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Entrenamiento</h1>
+                    <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.85rem' }}>Tu hoja de ruta diaria.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', background: '#f5f5f5', padding: '0.3rem', borderRadius: '12px' }}>
-                    <button onClick={() => setActiveTab('week')} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontSize: '0.85rem', fontWeight: 700, background: activeTab === 'week' ? 'white' : 'transparent', color: activeTab === 'week' ? 'var(--primary)' : 'var(--text-muted)', boxShadow: activeTab === 'week' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer' }}>Semana</button>
-                    <button onClick={() => setActiveTab('evolution')} style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', fontSize: '0.85rem', fontWeight: 700, background: activeTab === 'evolution' ? 'white' : 'transparent', color: activeTab === 'evolution' ? 'var(--primary)' : 'var(--text-muted)', boxShadow: activeTab === 'evolution' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Evolución {!isPro && '🔒'}</button>
+                <div style={{ display: 'flex', gap: '0.3rem', background: '#f5f5f5', padding: '0.2rem', borderRadius: '10px' }}>
+                    <button onClick={() => setActiveTab('week')} style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', border: 'none', fontSize: '0.75rem', fontWeight: 700, background: activeTab === 'week' ? 'white' : 'transparent', color: activeTab === 'week' ? 'var(--primary)' : 'var(--text-muted)', boxShadow: activeTab === 'week' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer' }}>Semana</button>
+                    <button onClick={() => setActiveTab('evolution')} style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', border: 'none', fontSize: '0.75rem', fontWeight: 700, background: activeTab === 'evolution' ? 'white' : 'transparent', color: activeTab === 'evolution' ? 'var(--primary)' : 'var(--text-muted)', boxShadow: activeTab === 'evolution' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px' }}>Evolución {!isPro && '🔒'}</button>
                 </div>
                 {activeTab === 'week' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'white', padding: '0.6rem 1.25rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                        <button onClick={() => changeWeek(-1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronLeft size={18} /></button>
-                        <div style={{ textAlign: 'center', minWidth: '120px' }}>
-                            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'block', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Semana {currentWeekId.split('-W')[1]}</span>
-                            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--primary-dark)' }}>{getWeekRange(currentWeekId)}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'white', padding: '0.5rem 0.75rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', flex: '0 1 auto' }}>
+                        <button onClick={() => changeWeek(-1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.3rem', borderRadius: '50%', display: 'flex' }}><ChevronLeft size={16} /></button>
+                        <div style={{ textAlign: 'center', minWidth: '100px' }}>
+                            <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', display: 'block', fontWeight: 700, textTransform: 'uppercase' }}>Semana {currentWeekId.split('-W')[1]}</span>
+                            <span style={{ fontWeight: 800, fontSize: '0.8rem', color: 'var(--primary-dark)' }}>{getWeekRange(currentWeekId)}</span>
                         </div>
-                        <button onClick={() => changeWeek(1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.4rem', borderRadius: '50%', display: 'flex' }}><ChevronRight size={18} /></button>
+                        <button onClick={() => changeWeek(1)} style={{ background: '#f5f5f5', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '0.3rem', borderRadius: '50%', display: 'flex' }}><ChevronRight size={16} /></button>
                     </div>
                 )}
             </div>
