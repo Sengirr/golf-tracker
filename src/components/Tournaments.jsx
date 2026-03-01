@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Trash2, Calendar, MapPin, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Trash2, Calendar, MapPin, CheckCircle, Clock, Trophy } from 'lucide-react';
 
 export default function Tournaments() {
     const [tournaments, setTournaments] = useState([]);
@@ -10,7 +10,8 @@ export default function Tournaments() {
         name: '',
         course: '',
         date: new Date().toISOString().split('T')[0],
-        status: 'Interesado'
+        status: 'Interesado',
+        result: ''
     });
 
     const formatDate = (dateString) => {
@@ -25,9 +26,16 @@ export default function Tournaments() {
 
     async function fetchTournaments() {
         setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            setLoading(false);
+            return;
+        }
+
         const { data, error } = await supabase
             .from('tournaments')
             .select('*')
+            .eq('user_id', user.id)
             .order('date', { ascending: true });
 
         if (error) console.error('Error:', error);
@@ -37,13 +45,30 @@ export default function Tournaments() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        const { error } = await supabase.from('tournaments').insert([formData]);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { error } = await supabase.from('tournaments').insert([{
+            ...formData,
+            user_id: user.id
+        }]);
+
         if (error) alert('Error al guardar el torneo');
         else {
             setShowForm(false);
-            setFormData({ name: '', course: '', date: new Date().toISOString().split('T')[0], status: 'Interesado' });
+            setFormData({ name: '', course: '', date: new Date().toISOString().split('T')[0], status: 'Interesado', result: '' });
             fetchTournaments();
         }
+    }
+
+    async function updateTournamentResult(id, result) {
+        const { error } = await supabase
+            .from('tournaments')
+            .update({ result })
+            .eq('id', id);
+
+        if (error) alert('Error al actualizar el resultado');
+        else fetchTournaments();
     }
 
     async function deleteTournament(id) {
@@ -67,7 +92,7 @@ export default function Tournaments() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
                 <div>
                     <h1>Calendario de Torneos</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Planifica tu temporada competitiva.</p>
+                    <p style={{ color: 'var(--text-muted)' }}>Planifica tu temporada competitiva y registra tus éxitos.</p>
                 </div>
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
                     <Plus size={20} /> {showForm ? 'Cancelar' : 'Añadir Torneo'}
@@ -118,6 +143,17 @@ export default function Tournaments() {
                                 <option value="Completado">Completado</option>
                             </select>
                         </div>
+                        {formData.status === 'Completado' && (
+                            <div className="input-group" style={{ gridColumn: 'span 2' }}>
+                                <label>Resultado / Posición</label>
+                                <input
+                                    type="text"
+                                    value={formData.result}
+                                    onChange={e => setFormData({ ...formData, result: e.target.value })}
+                                    placeholder="ej. +2 (Puesto 5º) o 38 puntos"
+                                />
+                            </div>
+                        )}
                         <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2' }}>Guardar Torneo</button>
                     </form>
                 </div>
@@ -134,34 +170,52 @@ export default function Tournaments() {
                     tournaments.map(tourney => (
                         <div key={tourney.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                                <div style={{ background: '#bc4749', color: 'white', width: '60px', height: '60px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                                <div style={{ background: tourney.status === 'Completado' ? 'var(--primary)' : '#bc4749', color: 'white', width: '60px', height: '60px', borderRadius: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                                     <Calendar size={24} />
                                 </div>
                                 <div>
-                                    <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                         <h3 style={{ margin: 0 }}>{tourney.name}</h3>
-                                        <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {tourney.course}</span>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {formatDate(tourney.date)}</span>
-                                            <span style={{
-                                                padding: '2px 8px',
-                                                borderRadius: '4px',
-                                                fontSize: '0.75rem',
-                                                fontWeight: 700,
-                                                ...getStatusStyle(tourney.status)
-                                            }}>
-                                                {tourney.status.toUpperCase()}
+                                        {tourney.result && (
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fff3b0', color: '#856404', padding: '2px 8px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>
+                                                <Trophy size={12} /> {tourney.result}
                                             </span>
-                                        </div>
+                                        )}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {tourney.course}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} /> {formatDate(tourney.date)}</span>
+                                        <span style={{
+                                            padding: '2px 8px',
+                                            borderRadius: '4px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            ...getStatusStyle(tourney.status)
+                                        }}>
+                                            {tourney.status.toUpperCase()}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => deleteTournament(tourney.id)}
-                                style={{ background: 'none', color: '#ff4d4d', padding: '0.5rem' }}
-                            >
-                                <Trash2 size={20} />
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                {tourney.status === 'Completado' && !tourney.result && (
+                                    <button
+                                        onClick={() => {
+                                            const res = prompt('Añadir resultado (ej. Top 10, 36pts...):');
+                                            if (res) updateTournamentResult(tourney.id, res);
+                                        }}
+                                        style={{ background: 'none', color: 'var(--primary)', padding: '0.5rem', fontWeight: 700, fontSize: '0.75rem' }}
+                                    >
+                                        EDITAR RESULTADO
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => deleteTournament(tourney.id)}
+                                    style={{ background: 'none', color: '#ff4d4d', padding: '0.5rem' }}
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            </div>
                         </div>
                     ))
                 )}
