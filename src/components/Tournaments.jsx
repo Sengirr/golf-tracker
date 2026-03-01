@@ -64,7 +64,10 @@ export default function Tournaments() {
     async function updateTournamentResult(id, result) {
         const { error } = await supabase
             .from('tournaments')
-            .update({ result })
+            .update({
+                result,
+                status: 'Completado'
+            })
             .eq('id', id);
 
         if (error) alert('Error al actualizar el resultado');

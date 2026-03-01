@@ -60,6 +60,7 @@ export default function Dashboard({ setActiveTab }) {
             const { data: tourns, count: tournCount } = await supabase.from('tournaments')
                 .select('*', { count: 'exact' })
                 .gte('date', new Date().toISOString().split('T')[0])
+                .neq('status', 'Completado')
                 .order('date', { ascending: true })
                 .limit(1);
 
@@ -311,7 +312,12 @@ export default function Dashboard({ setActiveTab }) {
                             <p style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{stats.nextTournament.name}</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', opacity: 0.9 }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><MapPin size={16} /> {stats.nextTournament.course}</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={16} /> {formatDate(stats.nextTournament.date)}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Calendar size={16} />
+                                    {stats.nextTournament.date === new Date().toISOString().split('T')[0]
+                                        ? <strong style={{ color: 'var(--accent)' }}>¡HOY!</strong>
+                                        : formatDate(stats.nextTournament.date)}
+                                </span>
                             </div>
                             <button className="btn-primary" onClick={() => setActiveTab('tournaments')} style={{ marginTop: '1.5rem', background: 'white', color: 'var(--primary)', width: '100%' }}>
                                 Ver todos
