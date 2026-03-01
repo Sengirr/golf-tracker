@@ -100,10 +100,14 @@ export default function TrainingLog() {
                 }
 
                 // Load Agenda
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
                 const { data } = await supabase
                     .from('agenda_logs')
                     .select('progress')
                     .eq('week_id', currentWeekId)
+                    .eq('user_id', user.id)
                     .single();
 
                 if (data) {
@@ -133,7 +137,12 @@ export default function TrainingLog() {
     useEffect(() => {
         if (activeTab === 'evolution' && isPro) {
             async function fetchHistory() {
-                const { data } = await supabase.from('agenda_logs').select('week_id, progress').order('week_id', { ascending: true }).limit(8);
+                const { data: { user } } = await supabase.auth.getUser();
+                const { data } = await supabase.from('agenda_logs')
+                    .select('week_id, progress')
+                    .eq('user_id', user?.id)
+                    .order('week_id', { ascending: true })
+                    .limit(8);
                 if (data) setHistory(data);
             }
             fetchHistory();
@@ -148,9 +157,13 @@ export default function TrainingLog() {
         saveTimeout.current = setTimeout(async () => {
             setSaving(true);
             try {
+                const { data: { user } } = await supabase.auth.getUser();
                 await supabase.from('agenda_logs').upsert({
-                    week_id: currentWeekId, progress: progress, updated_at: new Date().toISOString()
-                }, { onConflict: 'week_id' });
+                    week_id: currentWeekId,
+                    progress: progress,
+                    updated_at: new Date().toISOString(),
+                    user_id: user?.id
+                }, { onConflict: 'week_id,user_id' });
                 localStorage.setItem(`training_agenda_${currentWeekId} `, JSON.stringify(progress));
             } catch (err) { console.error(err); }
             finally { setSaving(false); }

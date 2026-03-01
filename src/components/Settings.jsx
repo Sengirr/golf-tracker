@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Save, User, RotateCcw, CheckCircle2, Plus, X, Trash2, Target, Layers, Timer, Box, Flag, MousePointer2 } from 'lucide-react';
+import { Save, User, RotateCcw, CheckCircle2, Plus, X, Trash2, Target, Layers, Timer, Box, Flag, MousePointer2, LogOut } from 'lucide-react';
 import { DRILL_CATEGORIES, getAllDrills, getDefaultWeeklyRoutine, getDrillById } from '../lib/drills';
+import { supabase } from '../lib/supabase';
 
 export default function Settings() {
     const [settings, setSettings] = useState({
@@ -268,9 +269,19 @@ export default function Settings() {
             <button onClick={handleSave} disabled={saving} style={{
                 background: 'var(--primary)', color: 'white', width: '100%', padding: '1rem', borderRadius: '16px', border: 'none',
                 fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-                cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.8 : 1, boxShadow: '0 8px 20px rgba(56, 102, 65, 0.3)'
+                cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.8 : 1, boxShadow: '0 8px 20px rgba(56, 102, 65, 0.3)',
+                marginBottom: '1rem'
             }}>
                 {saving ? 'Guardando...' : <> <Save size={20} /> Guardar Cambios </>}
+            </button>
+
+            {/* LOGOUT BUTTON */}
+            <button onClick={() => supabase.auth.signOut()} style={{
+                background: '#ffebee', color: '#c62828', width: '100%', padding: '1rem', borderRadius: '16px', border: 'none',
+                fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                cursor: 'pointer'
+            }}>
+                <LogOut size={20} /> Cerrar Sesión
             </button>
 
             {/* DRILL SELECTION MODAL */}

@@ -31,9 +31,13 @@ export default function Games() {
 
     async function fetchRounds() {
         setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
         const { data, error } = await supabase
             .from('rounds')
             .select('*')
+            .eq('user_id', user.id)
             .order('date', { ascending: false });
 
         if (error) console.error('Error:', error);
@@ -66,7 +70,10 @@ export default function Games() {
             player_hcp: hcp
         };
 
+        const { data: { user } } = await supabase.auth.getUser();
+
         const { error } = await supabase.from('rounds').insert([{
+            user_id: user?.id,
             course_name: finalData.course_name || 'Benalmádena Golf',
             score: parseInt(finalData.score) || 0,
             holes_played: parseInt(finalData.holes_played) || 9,

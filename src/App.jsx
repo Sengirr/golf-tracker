@@ -1,23 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
 import Games from './components/Games';
 import Tournaments from './components/Tournaments';
 import TrainingLog from './components/TrainingLog';
 import Settings from './components/Settings';
 import BottomNav from './components/BottomNav';
+import Auth from './components/Auth';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import { supabase } from './lib/supabase';
-import { LayoutDashboard, Trophy, Calendar as CalendarIcon, Flag, BookOpen, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, Trophy, Calendar as CalendarIcon, Flag, BookOpen, Settings as SettingsIcon, Loader2 } from 'lucide-react';
 
 function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const tabs = [
-    { id: 'dashboard', label: 'Panel', icon: LayoutDashboard },
-    { id: 'games', label: 'Partidas', icon: Trophy },
-    { id: 'agenda', label: 'Agenda', icon: BookOpen },
-    { id: 'tournaments', label: 'Torneos', icon: CalendarIcon }
-  ];
+  useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -29,6 +40,18 @@ function App() {
       default: return <Dashboard setActiveTab={setActiveTab} />;
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader2 size={40} className="spin" color="var(--primary)" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
 
   return (
     <div className="fade-in" style={{ paddingBottom: '80px' }}>
@@ -46,7 +69,6 @@ function App() {
           <SettingsIcon size={24} />
         </button>
       </nav>
-
 
       <main className="container" style={{ paddingTop: '1.5rem', marginBottom: '4rem' }}>
         <SubscriptionProvider>
