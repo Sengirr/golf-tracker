@@ -237,11 +237,104 @@ export default function TrainingLog() {
 
     const EvolutionView = () => {
         if (!isPro) return <Paywall onClose={() => setActiveTab('week')} />;
+        
+        if (!history || history.length === 0) {
+            return (
+                <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <Target size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                    <h3>Sin datos históricos</h3>
+                    <p>Completa tus entrenamientos semanales para ver tu evolución aquí.</p>
+                </div>
+            );
+        }
+
+        // Calculate completion rate for each week in history
+        const processedHistory = history.map(entry => {
+            const prog = entry.progress || {};
+            const weekId = entry.week_id;
+            
+            // We need to know which drills were active that week. 
+            // Since we don't have historical routine settings, we'll estimate based on keys present in progress
+            // format: dayKey__drillInputKey
+            const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            let totalInputs = 0;
+            let completedInputs = 0;
+
+            // Simple heuristic: count all keys that look like they belong to a day
+            Object.keys(prog).forEach(key => {
+                if (key.includes('__')) {
+                    totalInputs++;
+                    const val = prog[key];
+                    if (val === true || (val !== '' && val !== null && val !== undefined && val !== 0)) {
+                        completedInputs++;
+                    }
+                }
+            });
+
+            const completionRate = totalInputs > 0 ? Math.round((completedInputs / totalInputs) * 100) : 0;
+            
+            return {
+                weekId,
+                completionRate,
+                label: `Sem ${weekId.split('-W')[1]}`
+            };
+        });
+
         return (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                <Target size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                <h3>Evolución Dinámica</h3>
-                <p>Gráficos de tus nuevos ejercicios personalizados estarán disponibles pronto.</p>
+            <div style={{ padding: '0 1rem' }}>
+                <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                        <div style={{ background: 'var(--primary-light)', padding: '0.5rem', borderRadius: '12px' }}>
+                            <Sparkles size={24} color="var(--primary)" />
+                        </div>
+                        <div>
+                            <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Rendimiento Semanal</h3>
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tu constancia en los últimos meses.</p>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '200px', gap: '10px', padding: '1rem 0' }}>
+                        {processedHistory.map((item, idx) => (
+                            <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)' }}>{item.completionRate}%</div>
+                                <div style={{ 
+                                    width: '100%', 
+                                    background: 'var(--primary-light)', 
+                                    borderRadius: '8px', 
+                                    height: `${Math.max(item.completionRate, 5)}%`,
+                                    transition: 'height 1s ease-out',
+                                    position: 'relative',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{ 
+                                        position: 'absolute', 
+                                        top: 0, left: 0, right: 0, bottom: 0, 
+                                        background: 'linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                                        opacity: 0.8
+                                    }} />
+                                </div>
+                                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: 600 }}>{item.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ background: 'white', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
+                        <Award size={20} color="#f4a261" style={{ marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>PROMEDIO</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
+                            {Math.round(processedHistory.reduce((acc, curr) => acc + curr.completionRate, 0) / processedHistory.length)}%
+                        </div>
+                    </div>
+                    <div style={{ background: 'white', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
+                        <Trophy size={20} color="#386641" style={{ marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>MEJOR SEMANA</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
+                            {Math.max(...processedHistory.map(h => h.completionRate))}%
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     };

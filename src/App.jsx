@@ -62,7 +62,7 @@ function App() {
           <div className="nav-logo-icon">
             <Flag size={20} fill="white" />
           </div>
-          GOLFTRACKER
+          GOLF
         </div>
         <button
           onClick={() => setActiveTab('settings')}
@@ -83,7 +83,7 @@ function App() {
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <footer style={{ marginBottom: '6rem', padding: '1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-        <p>© 2026 GolfTracker Premium. Juega con confianza.</p>
+        <p>© 2026 Golf Premium. Juega con confianza.</p>
       </footer>
     </div>
   );
