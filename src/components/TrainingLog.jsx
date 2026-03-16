@@ -280,6 +280,71 @@ export default function TrainingLog() {
             };
         });
 
+        // Calculate drill-specific performance
+        const allDrills = getAllDrills(settings.customDrills);
+        const drillHistory = {};
+
+        history.forEach(entry => {
+            const prog = entry.progress || {};
+            const weekId = entry.week_id;
+
+            Object.keys(prog).forEach(key => {
+                if (key.includes('__')) {
+                    const [day, drillKey] = key.split('__');
+                    // Find which drill this input belongs to
+                    const drill = allDrills.find(d => d.inputs.some(i => i.key === drillKey));
+                    if (drill) {
+                        const input = drill.inputs.find(i => i.key === drillKey);
+                        const val = parseFloat(prog[key]);
+                        
+                        if (!isNaN(val) && input.max) {
+                            if (!drillHistory[drill.id]) {
+                                drillHistory[drill.id] = {
+                                    label: drill.label,
+                                    icon: drill.icon,
+                                    max: input.max,
+                                    weeks: {}
+                                };
+                            }
+                            if (!drillHistory[drill.id].weeks[weekId]) {
+                                drillHistory[drill.id].weeks[weekId] = [];
+                            }
+                            drillHistory[drill.id].weeks[weekId].push(val);
+                        }
+                    }
+                }
+            });
+        });
+
+        // Process drill history into displayable metrics
+        const drillMetrics = Object.keys(drillHistory).map(drillId => {
+            const drill = drillHistory[drillId];
+            const weeklyAverages = Object.keys(drill.weeks).map(weekId => {
+                const vals = drill.weeks[weekId];
+                return {
+                    weekId,
+                    avg: vals.reduce((a, b) => a + b, 0) / vals.length
+                };
+            }).sort((a, b) => a.weekId.localeCompare(b.weekId));
+
+            const latest = weeklyAverages[weeklyAverages.length - 1].avg;
+            const previous = weeklyAverages.length > 1 ? weeklyAverages[weeklyAverages.length - 2].avg : latest;
+            const average = weeklyAverages.reduce((acc, curr) => acc + curr.avg, 0) / weeklyAverages.length;
+            
+            const trend = previous > 0 ? ((latest - previous) / previous) * 100 : 0;
+
+            return {
+                id: drillId,
+                label: drill.label,
+                icon: drill.icon,
+                latest: Math.round(latest * 10) / 10,
+                average: Math.round(average * 10) / 10,
+                max: drill.max,
+                trend: Math.round(trend),
+                history: weeklyAverages
+            };
+        });
+
         return (
             <div style={{ padding: '0 1rem' }}>
                 <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', marginBottom: '2rem' }}>
@@ -319,7 +384,62 @@ export default function TrainingLog() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary-dark)', fontWeight: 800 }}>Detalle por Ejercicio</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                        {drillMetrics.length === 0 ? (
+                            <div style={{ padding: '2rem', textAlign: 'center', background: '#f9f9f9', borderRadius: '20px', color: 'var(--text-muted)' }}>
+                                <p style={{ margin: 0, fontSize: '0.9rem' }}>No hay suficientes datos numéricos para mostrar evolución por ejercicio aún.</p>
+                            </div>
+                        ) : (
+                            drillMetrics.map(drill => (
+                                <div key={drill.id} style={{ background: 'white', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div style={{ background: '#f5f5f5', padding: '0.5rem', borderRadius: '10px' }}>
+                                                <drill.icon size={20} color="var(--primary)" />
+                                            </div>
+                                            <div>
+                                                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>{drill.label}</h4>
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Promedio: {drill.average} / {drill.max}</span>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ 
+                                                fontSize: '0.85rem', 
+                                                fontWeight: 800, 
+                                                color: drill.trend > 0 ? '#386641' : drill.trend < 0 ? '#bc4749' : 'var(--text-muted)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '2px',
+                                                justifyContent: 'flex-end'
+                                            }}>
+                                                {drill.trend > 0 ? '↑' : drill.trend < 0 ? '↓' : ''} {Math.abs(drill.trend)}%
+                                            </div>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>vs anterior</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style={{ width: '100%', height: '8px', background: '#f0f0f0', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+                                        <div style={{ 
+                                            position: 'absolute', 
+                                            left: 0, top: 0, bottom: 0, 
+                                            width: `${(drill.latest / drill.max) * 100}%`, 
+                                            background: 'var(--primary)',
+                                            borderRadius: '4px'
+                                        }} />
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 600 }}>
+                                        <span style={{ color: 'var(--text-muted)' }}>Último resultado</span>
+                                        <span style={{ color: 'var(--primary-dark)' }}>{drill.latest} / {drill.max}</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
                     <div style={{ background: 'white', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.04)' }}>
                         <Award size={20} color="#f4a261" style={{ marginBottom: '0.5rem' }} />
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>PROMEDIO</div>
