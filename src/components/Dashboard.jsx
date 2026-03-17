@@ -66,7 +66,7 @@ export default function Dashboard({ setActiveTab }) {
 
             const avgNet = rounds?.length > 0
                 ? (rounds.reduce((acc, r) => {
-                    const phcp = getPHCP(r.player_hcp || 40.9);
+                    const phcp = getPHCP(r.player_hcp || 40.9, r.course_name);
                     return acc + (r.score - phcp);
                 }, 0) / rounds.length).toFixed(1)
                 : 'N/A';
@@ -78,7 +78,7 @@ export default function Dashboard({ setActiveTab }) {
             const avgStable = rounds?.length > 0
                 ? Math.round(rounds.reduce((acc, r) => {
                     let pts = r.hole_data
-                        ? calculateStableford(r.hole_data, r.player_hcp || 40.9)
+                        ? calculateStableford(r.hole_data, r.player_hcp || 40.9, r.course_name)
                         : (r.stableford_points || 0);
 
                     if (pts > 25 && (!r.hole_data)) pts = 18;
@@ -142,8 +142,12 @@ export default function Dashboard({ setActiveTab }) {
         setTimeout(() => {
             let response = "Interesante pregunta. Como tu caddie, te recomiendo enfocarte en mantener un ritmo suave y confiar en tu swing.";
             const lowerText = text.toLowerCase();
-            if (lowerText.includes('benalmadena') || lowerText.includes('campo')) {
-                response = "Benalmádena Pitch & Putt es muy técnico. La clave está en no pasarse de los greens, que son pequeños y rápidos. ¡Mejor corto que largo!";
+            if (lowerText.includes('benalmadena') || lowerText.includes('miguel angel') || lowerText.includes('campo')) {
+                if (lowerText.includes('miguel angel') || lowerText.includes('jimenez')) {
+                    response = "La Academia de M.A. Jiménez es fantástica. El hoyo 7 es el más difícil (S.I. 1), ¡no te pases de green! El diseño recrea el famoso Amen Corner en miniatura.";
+                } else {
+                    response = "Benalmádena Pitch & Putt es muy técnico. La clave está en no pasarse de los greens, que son pequeños y rápidos. ¡Mejor corto que largo!";
+                }
             } else if (lowerText.includes('putt') || lowerText.includes('green') || lowerText.includes('hcp')) {
                 if (!isPro) {
                     setShowChat(false);
@@ -344,16 +348,15 @@ export default function Dashboard({ setActiveTab }) {
                 </div>
 
                 <div className="grid grid-cols-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-                    <TrendChart
                         label="Puntos Stableford"
                         color="#386641"
                         unit=" pts"
-                        data={roundsHistory.map(r => r.stableford_points || calculateStableford(r.hole_data, r.player_hcp || 40.9))}
+                        data={roundsHistory.map(r => r.stableford_points || calculateStableford(r.hole_data, r.player_hcp || 40.9, r.course_name))}
                     />
                     <TrendChart
                         label="Media Netos"
                         color="#6a994e"
-                        data={roundsHistory.map(r => r.score - (getPHCP(r.player_hcp || 40.9)))}
+                        data={roundsHistory.map(r => r.score - (getPHCP(r.player_hcp || 40.9, r.course_name)))}
                     />
                     <TrendChart
                         label="Putts Totales"
@@ -412,7 +415,8 @@ export default function Dashboard({ setActiveTab }) {
                         </div>
                         <div style={{ padding: '1rem', borderTop: '1px solid #eee' }}>
                             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-                                <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo juego en Benalmádena?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Estrategia Campo</button>
+                                <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo juego en M.A. Jiménez?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Estrategia MAJ</button>
+                                <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo juego en Benalmádena?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Estrategia Benalmádena</button>
                                 <button className="btn-link" onClick={() => handleSendMessage(null, "¿Cómo bajo mi hándicap?")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Bajar HCP</button>
                                 <button className="btn-link" onClick={() => handleSendMessage(null, "Tengo problemas con el putt")} style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Consejo Putt</button>
                             </div>

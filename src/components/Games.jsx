@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Plus, Trash2, Calendar, MapPin, Hash, Camera, Sparkles } from 'lucide-react';
-import { BENALMADENA_SCORECARD, getPHCP, calculateStableford } from '../lib/golfUtils';
+import { SCORECARDS, getPHCP, calculateStableford } from '../lib/golfUtils';
 
 export default function Games() {
     const [rounds, setRounds] = useState([]);
@@ -120,7 +120,7 @@ export default function Games() {
         const totalStrokes = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.strokes) || 0), 0);
         const totalTriputts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) >= 3 ? 1 : 0), 0);
         const hcp = parseFloat(formData.player_hcp) || 40.9;
-        const points = calculateStableford(formData.hole_data, hcp);
+        const points = calculateStableford(formData.hole_data, hcp, formData.course_name);
         const totalLostBalls = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0);
         const totalPutts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0);
 
@@ -160,7 +160,8 @@ export default function Games() {
     }
 
     async function handleSimulateScan() {
-        const simulatedHoles = BENALMADENA_SCORECARD.pars.map((par, i) => ({
+        const scorecard = SCORECARDS[formData.course_name] || SCORECARDS['Benalmádena Golf'];
+        const simulatedHoles = scorecard.pars.map((par, i) => ({
             strokes: par + (Math.random() > 0.7 ? 1 : 0),
             putts: Math.floor(Math.random() * 3) + 1,
             fir: Math.random() > 0.4,
@@ -260,7 +261,8 @@ export default function Games() {
 
     const RoundDetailModal = ({ round, onClose }) => {
         if (!round) return null;
-        const playingHCP = getPHCP(round.player_hcp || 40.9);
+        const playingHCP = getPHCP(round.player_hcp || 40.9, round.course_name);
+        const scorecard = SCORECARDS[round.course_name] || SCORECARDS['Benalmádena Golf'];
 
         return (
             <div style={{
@@ -321,8 +323,8 @@ export default function Games() {
                             </thead>
                             <tbody>
                                 {round.hole_data.map((hole, idx) => {
-                                    const par = BENALMADENA_SCORECARD.pars[idx];
-                                    const si = BENALMADENA_SCORECARD.si[idx];
+                                    const par = scorecard.pars[idx] || 3;
+                                    const si = scorecard.si[idx] || 1;
 
                                     let strokesAllowed = Math.floor(playingHCP / 9);
                                     const extraStrokes = playingHCP % 9;
@@ -366,7 +368,7 @@ export default function Games() {
                                     <td className="mobile-hide" style={{ padding: '1rem 0.5rem' }}>{round.hole_data.filter(h => h.gir).length}</td>
                                     <td className="mobile-hide" style={{ padding: '1rem 0.5rem' }}>{round.total_lost_balls || round.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0)}</td>
                                     <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
-                                        {calculateStableford(round.hole_data, round.player_hcp)}
+                                        {calculateStableford(round.hole_data, round.player_hcp, round.course_name)}
                                     </td>
                                 </tr>
                             </tfoot>
@@ -437,13 +439,16 @@ export default function Games() {
                         <div className="grid grid-cols-2">
                             <div className="input-group">
                                 <label>Campo de Golf</label>
-                                <input
-                                    type="text"
+                                <select
                                     required
                                     value={formData.course_name}
                                     onChange={e => setFormData({ ...formData, course_name: e.target.value })}
-                                    placeholder="ej. Benalmádena Golf"
-                                />
+                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '12px', border: '1px solid #ddd', background: 'white' }}
+                                >
+                                    {Object.keys(SCORECARDS).map(name => (
+                                        <option key={name} value={name}>{name}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="input-group">
                                 <label>Tu HCP (Hándicap)</label>
@@ -497,7 +502,7 @@ export default function Games() {
                             </div>
 
                             <div style={{ gridColumn: 'span 2' }}>
-                                <h4 style={{ marginBottom: '1rem' }}>Registro por Hoyo (S.I. y Par de Benalmádena)</h4>
+                                <h4 style={{ marginBottom: '1rem' }}>Registro por Hoyo ({formData.course_name})</h4>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
                                         <thead>
