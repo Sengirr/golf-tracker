@@ -33,7 +33,7 @@ export default function Tournaments() {
         }
 
         const { data, error } = await supabase
-            .from('tournaments')
+            .from('golf_tournaments')
             .select('*')
             .eq('user_id', user.id)
             .order('date', { ascending: true });
@@ -48,7 +48,7 @@ export default function Tournaments() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { error } = await supabase.from('tournaments').insert([{
+        const { error } = await supabase.from('golf_tournaments').insert([{
             ...formData,
             user_id: user.id
         }]);
@@ -63,7 +63,7 @@ export default function Tournaments() {
 
     async function updateTournamentResult(id, result) {
         const { error } = await supabase
-            .from('tournaments')
+            .from('golf_tournaments')
             .update({
                 result,
                 status: 'Completado'
@@ -76,7 +76,7 @@ export default function Tournaments() {
 
     async function updateTournamentStatus(id, status) {
         const { error } = await supabase
-            .from('tournaments')
+            .from('golf_tournaments')
             .update({ status })
             .eq('id', id);
 
@@ -86,7 +86,7 @@ export default function Tournaments() {
 
     async function deleteTournament(id) {
         if (confirm('¿Estás seguro de que quieres eliminar este torneo?')) {
-            const { error } = await supabase.from('tournaments').delete().eq('id', id);
+            const { error } = await supabase.from('golf_tournaments').delete().eq('id', id);
             if (error) alert('Error al eliminar el torneo');
             else fetchTournaments();
         }

@@ -42,7 +42,7 @@ export default function Games() {
         // Fetch active sessions from friends
         const friendIds = friends.map(f => f.id);
         const { data } = await supabase
-            .from('game_sessions')
+            .from('golf_game_sessions')
             .select(`
                 id, 
                 course_name, 
@@ -60,7 +60,7 @@ export default function Games() {
         if (!user) return;
 
         const { data } = await supabase
-            .from('friendships')
+            .from('golf_friendships')
             .select(`
                 friend:friend_id(id, username),
                 user:user_id(id, username)
@@ -80,7 +80,7 @@ export default function Games() {
         if (!user) return;
 
         const { data, error } = await supabase
-            .from('rounds')
+            .from('golf_rounds')
             .select('*')
             .eq('user_id', user.id)
             .order('date', { ascending: false });
@@ -101,7 +101,7 @@ export default function Games() {
         // If friends are selected, create a shared session
         if (formData.participants.length > 0) {
             const { data: sessionData, error: sessionError } = await supabase
-                .from('game_sessions')
+                .from('golf_game_sessions')
                 .insert([{
                     host_id: user.id,
                     course_name: formData.course_name,
@@ -124,7 +124,7 @@ export default function Games() {
         const totalLostBalls = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.lost_balls) || 0), 0);
         const totalPutts = formData.hole_data.reduce((acc, h) => acc + (parseInt(h.putts) || 0), 0);
 
-        const { error } = await supabase.from('rounds').insert([{
+        const { error } = await supabase.from('golf_rounds').insert([{
             user_id: user.id,
             course_name: formData.course_name || 'Benalmádena Golf',
             score: totalStrokes,
@@ -174,7 +174,7 @@ export default function Games() {
 
     async function deleteRound(id) {
         if (confirm('¿Estás seguro de que quieres eliminar esta partida?')) {
-            const { error } = await supabase.from('rounds').delete().eq('id', id);
+            const { error } = await supabase.from('golf_rounds').delete().eq('id', id);
             if (error) alert('Error al eliminar la partida');
             else fetchRounds();
         }
@@ -192,7 +192,7 @@ export default function Games() {
                 .on('postgres_changes', {
                     event: '*',
                     schema: 'public',
-                    table: 'rounds',
+                    table: 'golf_rounds',
                     filter: `shared_session_id=eq.${sessionId}`
                 }, () => {
                     fetchSessionRounds();
@@ -206,7 +206,7 @@ export default function Games() {
 
         async function fetchSessionRounds() {
             const { data } = await supabase
-                .from('rounds')
+                .from('golf_rounds')
                 .select(`
                     id, 
                     score, 

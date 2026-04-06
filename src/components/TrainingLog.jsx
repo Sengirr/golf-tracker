@@ -104,7 +104,7 @@ export default function TrainingLog() {
                 if (!user) return;
 
                 const { data } = await supabase
-                    .from('agenda_logs')
+                    .from('golf_agenda_logs')
                     .select('progress')
                     .eq('week_id', currentWeekId)
                     .eq('user_id', user.id)
@@ -138,7 +138,7 @@ export default function TrainingLog() {
         if (activeTab === 'evolution' && isPro) {
             async function fetchHistory() {
                 const { data: { user } } = await supabase.auth.getUser();
-                const { data } = await supabase.from('agenda_logs')
+                const { data } = await supabase.from('golf_agenda_logs')
                     .select('week_id, progress')
                     .eq('user_id', user?.id)
                     .order('week_id', { ascending: true })
@@ -158,7 +158,7 @@ export default function TrainingLog() {
             setSaving(true);
             try {
                 const { data: { user } } = await supabase.auth.getUser();
-                await supabase.from('agenda_logs').upsert({
+                await supabase.from('golf_agenda_logs').upsert({
                     week_id: currentWeekId,
                     progress: progress,
                     updated_at: new Date().toISOString(),

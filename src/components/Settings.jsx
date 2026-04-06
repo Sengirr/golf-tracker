@@ -7,7 +7,8 @@ export default function Settings() {
     const [settings, setSettings] = useState({
         userName: 'Ignacio',
         coachName: 'Ruben',
-        hcpGoal: '40',
+        hcpCurrent: '36.5',
+        hcpGoal: '30',
         trainingDays: {
             monday: true,
             tuesday: true,
@@ -175,8 +176,12 @@ export default function Settings() {
                     <input type="text" value={settings.coachName} onChange={(e) => handleChange('coachName', e.target.value)} style={inputStyle} placeholder="Ej. Butch Harmon" />
                 </div>
                 <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={labelStyle}>Hándicap Actual</label>
+                    <input type="number" step="0.1" value={settings.hcpCurrent} onChange={(e) => handleChange('hcpCurrent', e.target.value)} style={inputStyle} placeholder="Ej. 36.5" />
+                </div>
+                <div style={{ marginBottom: '1.5rem' }}>
                     <label style={labelStyle}>Meta de Hándicap</label>
-                    <input type="number" value={settings.hcpGoal} onChange={(e) => handleChange('hcpGoal', e.target.value)} style={inputStyle} placeholder="Ej. 18" />
+                    <input type="number" step="0.1" value={settings.hcpGoal} onChange={(e) => handleChange('hcpGoal', e.target.value)} style={inputStyle} placeholder="Ej. 18" />
                 </div>
 
                 {/* Training Days Toggle */}

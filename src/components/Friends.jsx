@@ -20,7 +20,7 @@ export default function Friends() {
         if (!user) return;
 
         const { data, error } = await supabase
-            .from('friendships')
+            .from('golf_friendships')
             .select(`
                 id,
                 status,
@@ -43,7 +43,7 @@ export default function Friends() {
         if (!user) return;
 
         const { data, error } = await supabase
-            .from('friendships')
+            .from('golf_friendships')
             .select(`
                 id,
                 user:user_id(id, username, email, avatar_url)
@@ -63,7 +63,7 @@ export default function Friends() {
         const { data: { user } } = await supabase.auth.getUser();
 
         const { data, error } = await supabase
-            .from('profiles')
+            .from('golf_profiles')
             .select('*')
             .or(`email.ilike.%${searchQuery}%,username.ilike.%${searchQuery}%`)
             .neq('id', user.id)
@@ -77,7 +77,7 @@ export default function Friends() {
     async function sendRequest(friendId) {
         const { data: { user } } = await supabase.auth.getUser();
         const { error } = await supabase
-            .from('friendships')
+            .from('golf_friendships')
             .insert([{ user_id: user.id, friend_id: friendId, status: 'pending' }]);
 
         if (error) alert('Ya has enviado una solicitud o ya sois amigos.');
@@ -86,7 +86,7 @@ export default function Friends() {
 
     async function acceptRequest(requestId) {
         const { error } = await supabase
-            .from('friendships')
+            .from('golf_friendships')
             .update({ status: 'accepted' })
             .eq('id', requestId);
 
@@ -100,7 +100,7 @@ export default function Friends() {
     async function deleteFriendship(friendId) {
         const { data: { user } } = await supabase.auth.getUser();
         const { error } = await supabase
-            .from('friendships')
+            .from('golf_friendships')
             .delete()
             .or(`and(user_id.eq.${user.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user.id})`);
 

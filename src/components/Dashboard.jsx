@@ -23,8 +23,8 @@ export default function Dashboard({ setActiveTab }) {
     const [showPaywall, setShowPaywall] = useState(false);
     const [settings, setSettings] = useState({
         userName: 'Golfer',
-        currentHcp: parseFloat(localStorage.getItem('current_hcp')) || 40.9,
-        targetHcp: parseFloat(localStorage.getItem('target_hcp')) || 36.0
+        currentHcp: parseFloat(localStorage.getItem('current_hcp')) || 36.5,
+        targetHcp: parseFloat(localStorage.getItem('target_hcp')) || 30.0
     });
     const [showChat, setShowChat] = useState(false);
     const [chatInput, setChatInput] = useState('');
@@ -55,9 +55,9 @@ export default function Dashboard({ setActiveTab }) {
     async function fetchStats() {
         setLoading(true);
         try {
-            const { data: rounds } = await supabase.from('rounds').select('*');
-            const { data: training } = await supabase.from('trainings').select('duration_mins');
-            const { data: tourns, count: tournCount } = await supabase.from('tournaments')
+            const { data: rounds } = await supabase.from('golf_rounds').select('*');
+            const { data: training } = await supabase.from('golf_trainings').select('duration_mins');
+            const { data: tourns, count: tournCount } = await supabase.from('golf_tournaments')
                 .select('*', { count: 'exact' })
                 .gte('date', new Date().toISOString().split('T')[0])
                 .neq('status', 'Completado')
@@ -66,7 +66,7 @@ export default function Dashboard({ setActiveTab }) {
 
             const avgNet = rounds?.length > 0
                 ? (rounds.reduce((acc, r) => {
-                    const phcp = getPHCP(r.player_hcp || 40.9, r.course_name);
+                    const phcp = getPHCP(r.player_hcp || 36.5, r.course_name);
                     return acc + (r.score - phcp);
                 }, 0) / rounds.length).toFixed(1)
                 : 'N/A';
@@ -78,7 +78,7 @@ export default function Dashboard({ setActiveTab }) {
             const avgStable = rounds?.length > 0
                 ? Math.round(rounds.reduce((acc, r) => {
                     let pts = r.hole_data
-                        ? calculateStableford(r.hole_data, r.player_hcp || 40.9, r.course_name)
+                        ? calculateStableford(r.hole_data, r.player_hcp || 36.5, r.course_name)
                         : (r.stableford_points || 0);
 
                     if (pts > 25 && (!r.hole_data)) pts = 18;
@@ -155,7 +155,7 @@ export default function Dashboard({ setActiveTab }) {
                     return;
                 }
                 response = lowerText.includes('hcp')
-                    ? "Con tu HCP de 40.9, tienes 2 golpes extra por hoyo. No arriesgues; el bogey es tu amigo para bajar el handicap."
+                    ? "Con tu HCP de 36.5, tienes 2 golpes extra por hoyo. No arriesgues; el bogey es tu amigo para bajar el handicap."
                     : "Para evitar los triputts, visualiza una zona de 1 metro alrededor del hoyo. Tu objetivo en el primer putt es simplemente dejarla en esa zona.";
             }
             setMessages([...newMessages, { role: 'caddie', text: response }]);
@@ -351,7 +351,7 @@ export default function Dashboard({ setActiveTab }) {
                         label="Puntos Stableford"
                         color="#386641"
                         unit=" pts"
-                        data={roundsHistory.map(r => r.stableford_points || calculateStableford(r.hole_data, r.player_hcp || 40.9, r.course_name))}
+                        data={roundsHistory.map(r => r.stableford_points || calculateStableford(r.hole_data, r.player_hcp || 36.5, r.course_name))}
                     />
                     <TrendChart
                         label="Media Netos"
